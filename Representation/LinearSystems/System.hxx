@@ -30,7 +30,8 @@ namespace LinearSystems {
             
             int getNumberOfRestrictions() { return restrictions.size(); }
 
-
+            int restrictionNumber;
+            int variables;
 
     };
 };

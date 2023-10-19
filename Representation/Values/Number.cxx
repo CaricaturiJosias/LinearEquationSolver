@@ -58,6 +58,7 @@ namespace Value {
     Number& Number::operator=(std::string input) {
         value = std::stod(input);
         Mvalue = 0;
+        return *this;
     }
 
     Number& Number::operator+(Number input) {

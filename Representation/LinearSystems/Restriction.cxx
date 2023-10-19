@@ -32,13 +32,27 @@ namespace LinearSystems {
     };
 
     Restriction::Restriction() {
+        /**
+         * Create a restriction entirely from user input
+         * For example:
+         * (input sequence)
+         *  1   2   12  <=  4
+         * should result in 
+         * 1*x1 + 2*x2 + 12*x3 <= 4
+         */
         std::string input;
         bool hasSymbol = false;
         Value::Number valueToStore;
+        bool done = false;
         do {
-            input = askForInput(hasSymbol);
-            if (input == "DONE") {
+            if (done) {
                 break;
+            }
+            input = askForInput(hasSymbol);
+
+            if (hasSymbol) {
+                // One more value after
+                done = true;
             }
 
             if (isSymbol(input)) {
@@ -53,7 +67,7 @@ namespace LinearSystems {
                     isSymbol(input),
                     valueToStore}
             );
-        } while (input != "DONE");
+        } while (!done);
         std::cout << to_string(restrictionInstance, 0) << std::endl;
     }
 
@@ -63,7 +77,7 @@ namespace LinearSystems {
 
     std::string Restriction::askForInput(bool hasSymbol) {
         std::string input;
-        std::cout << "Enter a number or anything else to exit: ";
+        std::cout << "Enter a number or equation/inequation symbol: ";
         std::cin >> input;
         bool allowSymbol = isSymbol(input) && !hasSymbol;
         if (isDouble(input)) {
@@ -99,9 +113,10 @@ namespace LinearSystems {
     }
 
     bool Restriction::isSymbol(std::string input) {
-        auto it = std::find(symbolVec.begin(), symbolVec.end(), input);
-        if (it != symbolVec.end()) {
-            return true;
+        for (std::string symbol : symbolVec) {
+            if (symbol == input) {
+                return true;
+            } 
         }
         return false;
     }

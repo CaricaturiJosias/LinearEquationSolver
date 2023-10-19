@@ -11,6 +11,7 @@ PROJECT = ./solver
 
 SOURCES.cxx = \
 	SolverMain.cxx \
+	Helpers/Helper.cxx \
 	Representation/LinearSystems/Restriction.cxx \
 	Representation/LinearSystems/System.cxx \
 	Representation/Values/Number.cxx \
