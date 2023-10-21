@@ -176,11 +176,17 @@ namespace LinearSystems {
             return output;
         }
 
+        std::string symbol;
         for (int i = 0; i < (variableNumber+2); ++i) {
-            if (restrictionInstance[i].first == true) { // Its a symbol
-                output += " " + symbolMap[restrictionInstance[i].second.getValue()];
+            if (i == variableNumber) { // Its a symbol
+                symbol = symbolMap[restrictionInstance[i].second.getValue()];
+                if (symbol.empty()) {
+                    output += " symbol";
+                } else {
+                    output += " " + symbol;
+                }
                 continue;
-            } else if (i != (variableNumber+1)) {
+            } else if (i < (variableNumber)) {
                 output += " " + restrictionInstance[i].second.to_string() + 
                             ("*x" + std::to_string(j++)); // No, numbers have x1 x2 ... xn after
                 continue;
@@ -204,7 +210,7 @@ namespace LinearSystems {
     }
 
     void Restriction::displayRestriction() {
-        // system(CLEAR_COMMAND);
+        system(CLEAR_COMMAND);
         std::cout << to_string(restrictionNumber) << std::endl;
     }
 

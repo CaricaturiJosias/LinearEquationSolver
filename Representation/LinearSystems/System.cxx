@@ -65,9 +65,6 @@ namespace LinearSystems {
         for (int i = 1; i <= restrictionNumber; ++i) {
             restrictions[i-1] = Restriction(variables, i, objType::NONE);
         }
-
-        std::cout << "Printing all items" << std::endl << to_string() << std::endl;
-
     }
 
     System::~System() {
@@ -99,4 +96,5 @@ namespace LinearSystems {
         }
         return output;
     }
+
 };
