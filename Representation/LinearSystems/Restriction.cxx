@@ -46,7 +46,7 @@ namespace LinearSystems {
          * 1*x1 + 2*x2 + 12*x3 <= 4
          */
 
-        restrictionInstance = static_cast<restriction>(malloc(sizeof(restriction) * (variableNumber+2)));
+        restrictionInstance = static_cast<restrictionItem *>(malloc(sizeof(restrictionItem) * (variableNumber+2)));
         if (restrictionInstance == nullptr) {
             std::cout << "Failed to create the restriction of " << variableNumber << " variables" << std::endl;
         }
@@ -57,7 +57,7 @@ namespace LinearSystems {
         bool done = false;
         std::string message;
         // Run variables + 1, the +1 is for the symbol and the value on the right
-        for (int i = 0; i <= variableNumber+1; ++i) {
+        for (int i = 0; i < (variableNumber + 2); ++i) {
             input = askForInput(hasSymbol, message);
             bool isInputSymbol = isSymbol(input);
 
@@ -72,7 +72,7 @@ namespace LinearSystems {
                 hasSymbol = true;
                 valueToStore = getSymbolVal(input);
                 // Make remaining variables until symbol 0 if possible
-                zeroOut(i, variableNumber);
+                zeroOut(i);
             } else {
                 // Should it be a pure value?
                 if (i == variableNumber) { // No
@@ -85,7 +85,6 @@ namespace LinearSystems {
                 valueToStore = input;
             }
 
-            std::cout << "Assigning value" << std::endl;
             restrictionInstance[i] = 
                 restrictionItem{
                     isInputSymbol,
@@ -99,7 +98,7 @@ namespace LinearSystems {
     }
 
     // Make sure remaining variables are 0*xn
-    void Restriction::zeroOut(int &symbolIndex, int variableNumber) {
+    void Restriction::zeroOut(int &symbolIndex) {
         if (symbolIndex >= variableNumber) {
             return;
         }
@@ -172,22 +171,21 @@ namespace LinearSystems {
         }
 
         int j = 1;
-        bool afterSymbol = false;
 
         if (restrictionInstance == nullptr) {
             return output;
         }
 
-        for (int i = 0; i < variableNumber; ++i) {
+        for (int i = 0; i < (variableNumber+2); ++i) {
             if (restrictionInstance[i].first == true) { // Its a symbol
                 output += " " + symbolMap[restrictionInstance[i].second.getValue()];
-                afterSymbol = true;
+                continue;
+            } else if (i != (variableNumber+1)) {
+                output += " " + restrictionInstance[i].second.to_string() + 
+                            ("*x" + std::to_string(j++)); // No, numbers have x1 x2 ... xn after
                 continue;
             }
-            output += " " + restrictionInstance[i].second.to_string() + 
-                        ((afterSymbol) ? // Is this after the < > = <= >=?
-                        "" : // Yes, numbers don't have a x after restrictionInstance[i]
-                        ("*x" + std::to_string(j++))); // No, numbers have x1 x2 ... xn after
+            output += " " + restrictionInstance[i].second.to_string();
         }
         return output;
     }
@@ -206,7 +204,7 @@ namespace LinearSystems {
     }
 
     void Restriction::displayRestriction() {
-        system(CLEAR_COMMAND);
+        // system(CLEAR_COMMAND);
         std::cout << to_string(restrictionNumber) << std::endl;
     }
 

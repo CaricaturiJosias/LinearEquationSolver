@@ -66,6 +66,8 @@ namespace LinearSystems {
             restrictions[i-1] = Restriction(variables, i, objType::NONE);
         }
 
+        std::cout << "Printing all items" << std::endl << to_string() << std::endl;
+
     }
 
     System::~System() {
@@ -90,7 +92,7 @@ namespace LinearSystems {
     }
 
     std::string System::to_string() {
-        std::string output;
+        std::string output = objective->to_string() + "\n";
         int line = 1;
         for (int i = 0; i < restrictionNumber; ++i) {
             output += restrictions[i].to_string(line++) + "\n";

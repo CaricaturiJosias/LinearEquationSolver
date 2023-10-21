@@ -36,7 +36,6 @@ namespace LinearSystems {
      */
     typedef bool isSymbol;
     typedef std::pair<isSymbol, Value::Number> restrictionItem;
-    typedef restrictionItem * restriction;
 
     enum symbolEnum {
         NUMBER,
@@ -69,7 +68,7 @@ namespace LinearSystems {
 
             std::string askForInput(bool hasSymbol, std::string message);
 
-            restriction restrictionInstance;
+            restrictionItem * restrictionInstance;
 
             static bool isDouble(std::string input);
 
@@ -79,7 +78,7 @@ namespace LinearSystems {
 
             void displayRestriction();
 
-            void zeroOut(int &symbolIndex, int variableNumber);
+            void zeroOut(int &symbolIndex);
 
         public:
 
@@ -89,7 +88,7 @@ namespace LinearSystems {
 
             ~Restriction();
 
-            restriction getRestriction() { return restrictionInstance; }
+            restrictionItem * getRestriction() { return restrictionInstance; }
             
             std::string to_string(int line = 0);
 
