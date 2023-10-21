@@ -20,19 +20,40 @@ namespace LinearSystems {
 
     std::vector<restriction> System::restrictions{};
 
-    System::System() {
+    void System::getInputs() {
         // We should ask for values about:
         //  Ammount of restrictions
         //  Ammount of variables
         // Ask variable size
+
+        std::string restrictionAmmountStr;
+        std::string variableAmmountStr;
+        double restrictionAmmountDouble;
+
         bool validRestrictionAmmount = false;
-        std::string restrictionAmmount;
         while (!validRestrictionAmmount) {
             std::cout << "Insert the number of restrictions: ";
-            std::cin >> restrictionAmmount;
-            int scale = restrictionAmmount.size();
-            restrictionNumber = std::stoi(restrictionAmmount);
+            std::cin >> restrictionAmmountStr;
+            Helper::isAllDigits(restrictionAmmountStr, restrictionNumber);
+            if (restrictionNumber > 0) {
+                validRestrictionAmmount = true;
+            } 
         }
+
+        bool validVariableAmmount = false;
+        while (!validVariableAmmount) {
+            std::cout << "Insert the number of restrictions: ";
+            std::cin >> variableAmmountStr;
+            Helper::isAllDigits(variableAmmountStr, variables)
+            if (variables > 0) {
+                validVariableAmmount = true;
+            }
+        }
+    }
+
+    System::System() {
+        // Vai pedir quantidade de restrições e variáveis
+        getInputs();
     }
 
     System::~System() {

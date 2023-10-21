@@ -10,20 +10,21 @@
  */
 
 #include "Helper.hxx"
+#include <cmath>
+#include <cctype>
 
-bool Helper::isdigit(char n) {
-    unsigned char asciiChar = static_cast<unsigned char>(n);
-    // On the ascii table
-    return (48 > asciiChar) && (57 < asciiChar);
-}
-
-bool Helper::isAllDigits(std::string input) {
+void Helper::isAllDigits(std::string input, int &outputValue) {
+    bool isNumber = true;
     for (int i = 0; i < input.size(); i++) {
-        char number = restrictionAmmount.at(i);
-        if (Helper::isdigit(number)) {
-            int value = std::stoi(number);
-            restrictionNumber += value * pow(10,i);
+        char number = input.at(i);
+        if (!std::isdigit(number)) {
+            isNumber = false;
         }
     }
+
+    if (isNumber) {
+        outputValue = std::stoi(input);  
+    }
+    return;
 }
 

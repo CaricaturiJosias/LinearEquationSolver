@@ -1,1 +1,3 @@
 *.o
+solver
+solver.exe

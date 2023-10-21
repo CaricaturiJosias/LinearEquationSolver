@@ -16,9 +16,7 @@
 class Helper {
 
     public:
-        
-        static bool isdigit(char n);
 
-        static bool isAllDigits(std::string input);
+        static void isAllDigits(std::string input, int &outputValue);
 
 };

@@ -23,6 +23,8 @@ namespace LinearSystems {
 
             static std::vector<LinearSystems::restriction> restrictions;
 
+            void getInputs();
+
         public:
 
             System();

@@ -13,9 +13,11 @@
 #include <iostream>
 // #include "Representation/Values/Number.hxx"
 #include "Representation/LinearSystems/Restriction.hxx"
+#include "Representation/LinearSystems/System.hxx"
 
 int main () {
     // Get input from user
-    LinearSystems::Restriction * restriction = new LinearSystems::Restriction();
+    // LinearSystems::Restriction * restriction = new LinearSystems::Restriction();
+    LinearSystems::System * system = new LinearSystems::System();
     // Show final setup
 }
