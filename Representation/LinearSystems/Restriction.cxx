@@ -13,14 +13,6 @@
 #include <iostream>
 #include <algorithm>
 
-#ifdef _WIN32
-#include <windows.h>
-#define CLEAR_COMMAND "cls"
-#else
-#include <cstdlib>
-#define CLEAR_COMMAND "clear"
-#endif
-
 namespace LinearSystems {
 
     std::vector <std::string> symbolVec {
@@ -39,7 +31,12 @@ namespace LinearSystems {
         {EQUAL, "="}
     };
 
-    Restriction::Restriction(int variables) {
+    Restriction::Restriction() {
+
+    }
+
+    Restriction::Restriction(int variables, int restrictionNumber, objType type) :
+     restrictionNumber(restrictionNumber), objectiveType(type) {
         /**
          * Create a restriction entirely from user input
          * For example:
@@ -52,43 +49,39 @@ namespace LinearSystems {
         bool hasSymbol = false;
         Value::Number valueToStore;
         bool done = false;
+        std::string message;
         // Run variables + 1, the +1 is for the symbol and the value on the right
         for (int i = 0; i <= variables+1; ++i) {
-            input = askForInput(hasSymbol);
+            input = askForInput(hasSymbol, message);
+            bool isInputSymbol = isSymbol(input);
 
-            if (hasSymbol) {
-                if (isSymbol(input)) {
-                    // Prohibited
-                    --i;
-                    std::cout << "Invalid input, more than 1 symbol (<, >, <=, >=, =) is prohibited" << std::endl;
-                    continue;
-                }
-                // Not Prohibited, massa
+            if (hasSymbol && isInputSymbol) {
+                // Prohibited
+                --i;
+                message = "Invalid input, more than 1 symbol (<, >, <=, >=, =) is prohibited";
+                continue;
             }
 
-            if (isSymbol(input)) {
+            if (isInputSymbol) {
                 hasSymbol = true;
                 valueToStore = getSymbolVal(input);
-                if (i < variables) {
-
-                    for (int j = i; j < variables; j++) {
-                        // Remaining variables are 0*xn
-                        restrictionInstance.push_back(
-                            restrictionItem{
-                                false, // Normal value
-                                0}
-                        );
-                        i = variables;
-                    }
-                }
+                // Make remaining variables until symbol 0 if possible
+                zeroOut(i, variables);
             } else {
+                // Should it be a pure value?
+                if (i == variables) { // No
+                    message = "Please insert a symbol (<, >, <=, >=, =)";
+                    --i;
+                    continue;
+                }
+
                 // Value itself
                 valueToStore = input;
             }
 
             restrictionInstance.push_back(
                 restrictionItem{
-                    isSymbol(input),
+                    isInputSymbol,
                     valueToStore}
             );
         };
@@ -99,9 +92,26 @@ namespace LinearSystems {
         // Nothing lol
     }
 
-    std::string Restriction::askForInput(bool hasSymbol) {
+    // Make sure remaining variables are 0*xn
+    void Restriction::zeroOut(int &symbolIndex, int variableNumber) {
+        if (symbolIndex >= variableNumber) {
+            return;
+        }
+
+        for (int j = symbolIndex; j < variableNumber; j++) {
+            restrictionInstance.push_back(
+                restrictionItem{
+                    false, // Normal value
+                    0}
+            );
+            symbolIndex = variableNumber;
+        }
+    }
+
+    std::string Restriction::askForInput(bool hasSymbol, std::string message) {
         displayRestriction();
         std::string input;
+        std::cout << message << std::endl;
         std::cout << "Enter a number or equation/inequation symbol: ";
         std::cin >> input;
         bool allowSymbol = isSymbol(input) && !hasSymbol;
@@ -148,7 +158,15 @@ namespace LinearSystems {
 
     std::string Restriction::to_string(int line) {
         restriction::iterator it = restrictionInstance.begin();
-        std::string output = "R" + std::to_string(line) + ": ";
+        std::string output;
+        if (objectiveType == MAX) {
+            output = "Z: ";
+        } else if (objectiveType == MIN) {
+            output = "C: ";
+        } else {
+            output = "R" + std::to_string(line) + ": ";
+        }
+
         int i = 1;
         bool afterSymbol = false;
 
@@ -183,6 +201,7 @@ namespace LinearSystems {
 
     void Restriction::displayRestriction() {
         system(CLEAR_COMMAND);
-        std::cout << to_string(0) << std::endl;
+        std::cout << to_string(restrictionNumber) << std::endl;
     }
+
 };

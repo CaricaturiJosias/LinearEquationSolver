@@ -19,8 +19,6 @@
 
 namespace LinearSystems {
 
-    std::vector<Restriction> System::restrictions{};
-
     void System::getInputs() {
         // We should ask for values about:
         //  Ammount of restrictions
@@ -55,21 +53,42 @@ namespace LinearSystems {
     System::System() {
         // Vai pedir quantidade de restrições e variáveis
         getInputs();
-        // Vai pedir para fazer as restrições necessárias
-        for (int i = 0; i < restrictionNumber; ++i) {
-            std::cout << "Creating variable number: " << i+1 << std::endl;
-            restrictions.push_back(Restriction(variables));
+
+        buildObjective();
+
+        for (int i = 1; i <= restrictionNumber; ++i) {
+            std::cout << "Creating variable number: " << i << std::endl;
+            restrictions.push_back(Restriction(variables, i, objType::NONE));
         }
+
     }
 
     System::~System() {
+    }
+
+    void System::buildObjective() {
+        bool inputNotValid = true;
+        std::string input;
+        while (inputNotValid) {
+            std::cout << "Is the objective to minimize or maximize? [M,m]: ";
+            std::cin >> input;
+            if (input == std::string("M")) {
+                objectiveAction = objType::MAX;
+                inputNotValid = false;
+            } else if (input == std::string("m")) {
+                objectiveAction = objType::MIN;
+                inputNotValid = false;
+            }
+        }
+
+        objective = Restriction(variables, 0, objectiveAction);
     }
 
     std::string System::to_string() {
         std::string output;
         int i = 1;
         for (Restriction restriction : restrictions) {
-            output = restriction.to_string(i++) + "\n";
+            output += restriction.to_string(i++) + "\n";
         }
         return output;
     }

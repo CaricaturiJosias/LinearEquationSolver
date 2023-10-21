@@ -21,9 +21,17 @@ namespace LinearSystems {
 
         private:
 
-            static std::vector<Restriction> restrictions;
+            std::vector<Restriction> restrictions;
+
+            Restriction objective;
+
+            objType objectiveAction;
+
+            char objectiveItem;
 
             void getInputs();
+
+            void buildObjective();
 
         public:
 

@@ -15,6 +15,14 @@
 #include <vector>
 #include "../Values/Number.hxx"
 
+#ifdef _WIN32
+#include <windows.h>
+#define CLEAR_COMMAND "cls"
+#else
+#include <cstdlib>
+#define CLEAR_COMMAND "clear"
+#endif
+
 namespace LinearSystems {
 
     /**
@@ -39,6 +47,12 @@ namespace LinearSystems {
         EQUAL
     };
 
+    typedef enum objectiveType {
+        NONE, // Its a restriction
+        MIN,
+        MAX
+    } objType;
+
     extern std::vector <std::string> symbolVec;
 
     extern std::map<int, std::string> symbolMap;
@@ -47,7 +61,11 @@ namespace LinearSystems {
 
         private:
 
-            std::string askForInput(bool hasSymbol);
+            int restrictionNumber;
+
+            objType objectiveType;
+
+            std::string askForInput(bool hasSymbol, std::string message);
 
             restriction restrictionInstance;
 
@@ -59,9 +77,13 @@ namespace LinearSystems {
 
             void displayRestriction();
 
+            void zeroOut(int &symbolIndex, int variableNumber);
+
         public:
 
-            Restriction(int variables);
+            Restriction();
+
+            Restriction(int variables, int restrictionNumber, objType type = NONE);
 
             ~Restriction();
 

@@ -1,7 +1,7 @@
 /**
  * @file Helper.cxx
  * @author Gabriel Cezário (gabriel.cezario@pucpr.edu.br) and Milena Silvério (milena.silverio@pucpr.edu.br)
- * @brief File implemented the header for a helper interface (treat input and stuff
+ * @brief File implemented the helper interface (treat input and stuff)
  * @version 0.1
  * @date 2023-06-21
  * 
