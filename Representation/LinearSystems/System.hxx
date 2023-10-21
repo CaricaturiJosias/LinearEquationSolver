@@ -21,7 +21,7 @@ namespace LinearSystems {
 
         private:
 
-            static std::vector<LinearSystems::restriction> restrictions;
+            static std::vector<Restriction> restrictions;
 
             void getInputs();
 
@@ -30,7 +30,10 @@ namespace LinearSystems {
             System();
             ~System();
             
-            int getNumberOfRestrictions() { return restrictions.size(); }
+            int getNumberOfRestrictions() { return restrictionNumber; }
+            int getNumberOfVariables() { return variables; }
+
+            std::string to_string();
 
             int restrictionNumber;
             int variables;

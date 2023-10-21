@@ -55,17 +55,19 @@ namespace LinearSystems {
 
             static bool isSymbol(std::string input);
 
-            static std::string to_string(restriction instance, int line = 0);
-
             static Value::Number getSymbolVal(std::string input);
+
+            void displayRestriction();
 
         public:
 
-            Restriction();
+            Restriction(int variables);
 
             ~Restriction();
 
             restriction getRestriction() { return restrictionInstance; }
+            
+            std::string to_string(int line = 0);
 
     };
 

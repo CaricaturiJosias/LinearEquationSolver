@@ -11,6 +11,7 @@
 
 #include "System.hxx"
 #include "../../Helpers/Helper.hxx"
+#include "Restriction.hxx"
 #include <cctype>
 #include <iostream>
 #include <cmath>
@@ -18,7 +19,7 @@
 
 namespace LinearSystems {
 
-    std::vector<restriction> System::restrictions{};
+    std::vector<Restriction> System::restrictions{};
 
     void System::getInputs() {
         // We should ask for values about:
@@ -42,9 +43,9 @@ namespace LinearSystems {
 
         bool validVariableAmmount = false;
         while (!validVariableAmmount) {
-            std::cout << "Insert the number of restrictions: ";
+            std::cout << "Insert the number of variables: ";
             std::cin >> variableAmmountStr;
-            Helper::isAllDigits(variableAmmountStr, variables)
+            Helper::isAllDigits(variableAmmountStr, variables);
             if (variables > 0) {
                 validVariableAmmount = true;
             }
@@ -54,9 +55,22 @@ namespace LinearSystems {
     System::System() {
         // Vai pedir quantidade de restrições e variáveis
         getInputs();
+        // Vai pedir para fazer as restrições necessárias
+        for (int i = 0; i < restrictionNumber; ++i) {
+            std::cout << "Creating variable number: " << i+1 << std::endl;
+            restrictions.push_back(Restriction(variables));
+        }
     }
 
     System::~System() {
     }
 
+    std::string System::to_string() {
+        std::string output;
+        int i = 1;
+        for (Restriction restriction : restrictions) {
+            output = restriction.to_string(i++) + "\n";
+        }
+        return output;
+    }
 };

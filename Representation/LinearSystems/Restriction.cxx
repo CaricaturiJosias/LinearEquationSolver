@@ -13,6 +13,14 @@
 #include <iostream>
 #include <algorithm>
 
+#ifdef _WIN32
+#include <windows.h>
+#define CLEAR_COMMAND "cls"
+#else
+#include <cstdlib>
+#define CLEAR_COMMAND "clear"
+#endif
+
 namespace LinearSystems {
 
     std::vector <std::string> symbolVec {
@@ -31,7 +39,7 @@ namespace LinearSystems {
         {EQUAL, "="}
     };
 
-    Restriction::Restriction() {
+    Restriction::Restriction(int variables) {
         /**
          * Create a restriction entirely from user input
          * For example:
@@ -44,21 +52,37 @@ namespace LinearSystems {
         bool hasSymbol = false;
         Value::Number valueToStore;
         bool done = false;
-        do {
-            if (done) {
-                break;
-            }
+        // Run variables + 1, the +1 is for the symbol and the value on the right
+        for (int i = 0; i <= variables+1; ++i) {
             input = askForInput(hasSymbol);
 
             if (hasSymbol) {
-                // One more value after
-                done = true;
+                if (isSymbol(input)) {
+                    // Prohibited
+                    --i;
+                    std::cout << "Invalid input, more than 1 symbol (<, >, <=, >=, =) is prohibited" << std::endl;
+                    continue;
+                }
+                // Not Prohibited, massa
             }
 
             if (isSymbol(input)) {
                 hasSymbol = true;
                 valueToStore = getSymbolVal(input);
+                if (i < variables) {
+
+                    for (int j = i; j < variables; j++) {
+                        // Remaining variables are 0*xn
+                        restrictionInstance.push_back(
+                            restrictionItem{
+                                false, // Normal value
+                                0}
+                        );
+                        i = variables;
+                    }
+                }
             } else {
+                // Value itself
                 valueToStore = input;
             }
 
@@ -67,8 +91,8 @@ namespace LinearSystems {
                     isSymbol(input),
                     valueToStore}
             );
-        } while (!done);
-        std::cout << to_string(restrictionInstance, 0) << std::endl;
+        };
+        displayRestriction();
     }
 
     Restriction::~Restriction() {
@@ -76,6 +100,7 @@ namespace LinearSystems {
     }
 
     std::string Restriction::askForInput(bool hasSymbol) {
+        displayRestriction();
         std::string input;
         std::cout << "Enter a number or equation/inequation symbol: ";
         std::cin >> input;
@@ -86,7 +111,7 @@ namespace LinearSystems {
             return input;
         }
         // Invalid
-        return "DONE";
+        return "0";
     }
 
     bool Restriction::isDouble(std::string input) {
@@ -121,14 +146,13 @@ namespace LinearSystems {
         return false;
     }
 
-    std::string Restriction::to_string(restriction instance, int line) {
-        restriction::iterator it = instance.begin();
+    std::string Restriction::to_string(int line) {
+        restriction::iterator it = restrictionInstance.begin();
         std::string output = "R" + std::to_string(line) + ": ";
         int i = 1;
         bool afterSymbol = false;
 
-        while (it != instance.end()) {
-            std::cout << output << std::endl;
+        while (it != restrictionInstance.end()) {
             if (it->first == true) { // Its a symbol
                 output += " " + symbolMap[it->second.getValue()];
                 afterSymbol = true;
@@ -155,5 +179,10 @@ namespace LinearSystems {
         }
         // Should never come to this, its a placeholder for compilation errors
         return -1;
+    }
+
+    void Restriction::displayRestriction() {
+        system(CLEAR_COMMAND);
+        std::cout << to_string(0) << std::endl;
     }
 };
