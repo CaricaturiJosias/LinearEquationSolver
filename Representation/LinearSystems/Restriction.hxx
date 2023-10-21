@@ -36,7 +36,7 @@ namespace LinearSystems {
      */
     typedef bool isSymbol;
     typedef std::pair<isSymbol, Value::Number> restrictionItem;
-    typedef std::vector<restrictionItem> restriction;
+    typedef restrictionItem * restriction;
 
     enum symbolEnum {
         NUMBER,
@@ -62,6 +62,8 @@ namespace LinearSystems {
         private:
 
             int restrictionNumber;
+
+            int variableNumber;
 
             objType objectiveType;
 

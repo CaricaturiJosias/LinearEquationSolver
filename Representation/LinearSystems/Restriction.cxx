@@ -36,7 +36,7 @@ namespace LinearSystems {
     }
 
     Restriction::Restriction(int variables, int restrictionNumber, objType type) :
-     restrictionNumber(restrictionNumber), objectiveType(type) {
+        restrictionNumber(restrictionNumber), objectiveType(type), variableNumber(variables) {
         /**
          * Create a restriction entirely from user input
          * For example:
@@ -45,13 +45,19 @@ namespace LinearSystems {
          * should result in 
          * 1*x1 + 2*x2 + 12*x3 <= 4
          */
+
+        restrictionInstance = static_cast<restriction>(malloc(sizeof(restriction) * (variableNumber+2)));
+        if (restrictionInstance == nullptr) {
+            std::cout << "Failed to create the restriction of " << variableNumber << " variables" << std::endl;
+        }
+
         std::string input;
         bool hasSymbol = false;
         Value::Number valueToStore;
         bool done = false;
         std::string message;
         // Run variables + 1, the +1 is for the symbol and the value on the right
-        for (int i = 0; i <= variables+1; ++i) {
+        for (int i = 0; i <= variableNumber+1; ++i) {
             input = askForInput(hasSymbol, message);
             bool isInputSymbol = isSymbol(input);
 
@@ -66,10 +72,10 @@ namespace LinearSystems {
                 hasSymbol = true;
                 valueToStore = getSymbolVal(input);
                 // Make remaining variables until symbol 0 if possible
-                zeroOut(i, variables);
+                zeroOut(i, variableNumber);
             } else {
                 // Should it be a pure value?
-                if (i == variables) { // No
+                if (i == variableNumber) { // No
                     message = "Please insert a symbol (<, >, <=, >=, =)";
                     --i;
                     continue;
@@ -79,11 +85,11 @@ namespace LinearSystems {
                 valueToStore = input;
             }
 
-            restrictionInstance.push_back(
+            std::cout << "Assigning value" << std::endl;
+            restrictionInstance[i] = 
                 restrictionItem{
                     isInputSymbol,
-                    valueToStore}
-            );
+                    valueToStore};
         };
         displayRestriction();
     }
@@ -99,11 +105,10 @@ namespace LinearSystems {
         }
 
         for (int j = symbolIndex; j < variableNumber; j++) {
-            restrictionInstance.push_back(
+            restrictionInstance[j] = 
                 restrictionItem{
                     false, // Normal value
-                    0}
-            );
+                    0};
             symbolIndex = variableNumber;
         }
     }
@@ -157,7 +162,6 @@ namespace LinearSystems {
     }
 
     std::string Restriction::to_string(int line) {
-        restriction::iterator it = restrictionInstance.begin();
         std::string output;
         if (objectiveType == MAX) {
             output = "Z: ";
@@ -167,21 +171,23 @@ namespace LinearSystems {
             output = "R" + std::to_string(line) + ": ";
         }
 
-        int i = 1;
+        int j = 1;
         bool afterSymbol = false;
 
-        while (it != restrictionInstance.end()) {
-            if (it->first == true) { // Its a symbol
-                output += " " + symbolMap[it->second.getValue()];
+        if (restrictionInstance == nullptr) {
+            return output;
+        }
+
+        for (int i = 0; i < variableNumber; ++i) {
+            if (restrictionInstance[i].first == true) { // Its a symbol
+                output += " " + symbolMap[restrictionInstance[i].second.getValue()];
                 afterSymbol = true;
-                it++;
                 continue;
             }
-            output += " " + it->second.to_string() + 
+            output += " " + restrictionInstance[i].second.to_string() + 
                         ((afterSymbol) ? // Is this after the < > = <= >=?
-                        "" : // Yes, numbers don't have a x after it
-                        ("*x" + std::to_string(i++))); // No, numbers have x1 x2 ... xn after
-            it++;
+                        "" : // Yes, numbers don't have a x after restrictionInstance[i]
+                        ("*x" + std::to_string(j++))); // No, numbers have x1 x2 ... xn after
         }
         return output;
     }

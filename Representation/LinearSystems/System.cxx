@@ -56,9 +56,14 @@ namespace LinearSystems {
 
         buildObjective();
 
+        restrictions = static_cast<Restriction *>(malloc(sizeof(Restriction) * restrictionNumber));
+        if (restrictions == nullptr) {
+            std::cout << "Memory allocation error" << std::endl;
+            return;
+        }
+
         for (int i = 1; i <= restrictionNumber; ++i) {
-            std::cout << "Creating variable number: " << i << std::endl;
-            restrictions.push_back(Restriction(variables, i, objType::NONE));
+            restrictions[i-1] = Restriction(variables, i, objType::NONE);
         }
 
     }
@@ -81,14 +86,14 @@ namespace LinearSystems {
             }
         }
 
-        objective = Restriction(variables, 0, objectiveAction);
+        objective = new Restriction(variables, 0, objectiveAction);
     }
 
     std::string System::to_string() {
         std::string output;
-        int i = 1;
-        for (Restriction restriction : restrictions) {
-            output += restriction.to_string(i++) + "\n";
+        int line = 1;
+        for (int i = 0; i < restrictionNumber; ++i) {
+            output += restrictions[i].to_string(line++) + "\n";
         }
         return output;
     }

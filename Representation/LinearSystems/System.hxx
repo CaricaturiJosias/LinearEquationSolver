@@ -21,9 +21,9 @@ namespace LinearSystems {
 
         private:
 
-            std::vector<Restriction> restrictions;
+            Restriction * restrictions;
 
-            Restriction objective;
+            Restriction * objective;
 
             objType objectiveAction;
 
@@ -46,5 +46,8 @@ namespace LinearSystems {
             int restrictionNumber;
             int variables;
 
+            Restriction * getRestrictions() { return restrictions; }
+            Restriction * getObjective() { return objective; }
+            objType getAction() { return objectiveAction; }
     };
 };

@@ -16,20 +16,26 @@
 
 namespace Solver {
 
+    enum resolutionOption {
+        RESULT_ONLY = 1,
+        FAST_ITERATIONS = 2,
+        PAUSED_ITERATIONS = 3
+    };
+
     class Simplex {
 
         public:
     
-            Symplex();
+            Simplex();
 
-            ~Symplex();
+            ~Simplex();
 
         private:
 
-            static std::vector<LinearSystems::System> resolutionOrder;
+            LinearSystems::System * resolutionOrder;
 
-            
+            resolutionOption chosenOption;
 
-    }
+    };
 
-}
+};
