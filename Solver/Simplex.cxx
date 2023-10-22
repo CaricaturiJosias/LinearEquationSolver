@@ -32,12 +32,11 @@ namespace Solver {
                 inputNotValid = false;
                 chosenOption = static_cast<resolutionOption>(selectedOption);
             }
-            
+
             // Populate system
             resolutionOrder = new LinearSystems::System();
 
         }
-    
     }
 
     Simplex::~Simplex() {

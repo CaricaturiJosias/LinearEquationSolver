@@ -50,6 +50,8 @@ namespace LinearSystems {
             Restriction * getObjective() { return objective; }
             objType getAction() { return objectiveAction; }
 
+            void  setVariableNumber(int newVarNbr) { variables = newVarNbr; }
+
     };
 
 };

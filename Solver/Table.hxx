@@ -38,12 +38,17 @@
  *      6 - repeat
 */
 namespace Solver {
+    
+    struct baseVariableItem {
+        LinearSystems::restrictionItem value;
+        int index;
+    };
 
     class Table {
 
         public:
 
-            Table(LinearSystems::System linearSystem);
+            Table(LinearSystems::System * toSolveSystem);
 
             ~Table();
 
@@ -53,13 +58,18 @@ namespace Solver {
 
             std::vector<LinearSystems::restrictionItem> probeRestriction(LinearSystems::Restriction * restriction, int variableNbr);
 
-            LinearSystems::System systemToSolve;
-            
+            void decideBaseVariables();
+
+            LinearSystems::System * systemToSolve;
+
             int addedX;
             int addedM;
             int action;
 
             LinearSystems::objectiveType objective;
+
+            baseVariableItem * baseVariables;
+
     };
 
 };

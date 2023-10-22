@@ -19,7 +19,7 @@
 int main () {
     // Get input from user
     // LinearSystems::Restriction * restriction = new LinearSystems::Restriction();
-    LinearSystems::System * system = new LinearSystems::System();
-    Solver::Table table(*system);
+    LinearSystems::System * systemToSolve = new LinearSystems::System();
+    Solver::Table table(systemToSolve);
     // Show final setup
 }

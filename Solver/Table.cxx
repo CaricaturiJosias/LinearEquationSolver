@@ -12,31 +12,46 @@
 #include "Table.hxx"
 #include "../Representation/Values/Number.hxx"
 #include <iostream>
+#include <set>
 
 namespace Solver {
 
-    Table::Table(LinearSystems::System linearSystem) : 
-        systemToSolve(linearSystem),
-        addedM(0), addedX(0),
-        action(linearSystem.getAction()),
-        objective(linearSystem.getAction()) {
-        // nothing so far huh
+    Table::Table(LinearSystems::System * toSolveSystem) : systemToSolve(toSolveSystem),
+                                                            addedM(0), addedX(0) {
+        
+        action  = systemToSolve->getAction();
+        objective  = systemToSolve->getAction();
+
+        // Same number as number of restrictions
+        baseVariables = static_cast<baseVariableItem *>(
+                            malloc(sizeof(baseVariableItem)
+                                    *systemToSolve->getNumberOfRestrictions()));
+        
+        // Checks for artificial variables,
+        // insert them and adjust the restrictions
         reviewSystem();
-        std::cout << systemToSolve.to_string() << std::endl;
+
+        // TODO - REMOVE
+        std::cout << systemToSolve->to_string() << std::endl;
+
+        // Checks for artificial variables,
+        // insert them and adjust the restrictions
+        decideBaseVariables();
+
     }
 
     Table::~Table() {
-
+        free(baseVariables);
     }
 
 
 
     void Table::reviewSystem() {
-        LinearSystems::Restriction * restrictions = systemToSolve.getRestrictions();
-        LinearSystems::Restriction * objective = systemToSolve.getObjective();
+        LinearSystems::Restriction * restrictions = systemToSolve->getRestrictions();
+        LinearSystems::Restriction * objective = systemToSolve->getObjective();
 
-        int restrictionNbr = systemToSolve.getNumberOfRestrictions();
-        int variableNbr = systemToSolve.getNumberOfVariables();
+        int restrictionNbr = systemToSolve->getNumberOfRestrictions();
+        int variableNbr = systemToSolve->getNumberOfVariables();
 
         std::vector<LinearSystems::restrictionItem> artificialVariables;
         std::vector<LinearSystems::restrictionItem> results;
@@ -55,7 +70,9 @@ namespace Solver {
 
         // start the loop again because we were 
         // collecting all the artificial variables needed
-        restrictions = systemToSolve.getRestrictions();
+        restrictions = systemToSolve->getRestrictions();
+        systemToSolve->setVariableNumber(artificialVariables.size() + systemToSolve->getNumberOfVariables());
+
         bool isFirst = false;
         for (int i = 0; i < restrictionNbr && restrictions != nullptr; i++, restrictions++) {
             isFirst = i == 0;
@@ -100,6 +117,85 @@ namespace Solver {
         }
 
         return result;
+    }
+
+    void Table::decideBaseVariables() {
+        LinearSystems::restrictionItem *  objectiveItem = systemToSolve->getObjective()->getRestriction();
+
+        int numVariables = systemToSolve->getNumberOfVariables();
+        std::cout << "Number of variables " << numVariables << std::endl;
+        int numRestrictions = systemToSolve->getNumberOfRestrictions();
+
+        bool lookForM = true;
+
+        std::set<int> insertedBase;
+        /**
+         * All base variables must be set, the order to prioritize is:
+         * 1 - M values
+         * 2 - values without M
+         */
+        bool alreadyIn, hasMvalue;
+
+        for (int i = 0; i < numRestrictions; ++i) {
+            /**
+             * Look for each M value or values without M on the next
+             */
+            for (int j = numVariables-1; j >= 0; --j) {
+                // If we are looking for M values (first loop)
+                alreadyIn  = insertedBase.find(j) != insertedBase.end();
+                hasMvalue = objectiveItem[j].second.getMvalue();
+                if (alreadyIn) {
+                     std::cout << "Already in" << std::endl;
+                    continue;
+                }
+
+                if (lookForM && hasMvalue) {
+                    std::cout << "lookForM && hasMvalue " << std::endl;
+                    insertedBase.insert(j);
+                    baseVariables[i].value.second = objectiveItem[j].second;
+                    baseVariables[i].index = j+1;
+                    break;
+                } // if (lookForM && hasMvalue)
+
+                if (!lookForM) {
+                    std::cout << "!lookForM " << std::endl;
+                    // Last item? we cannot reach this if its a M value in the end
+                    if (j == (numVariables-1)) {
+                        insertedBase.insert(j);
+                        baseVariables[i].value.second = objectiveItem[j].second;
+                        baseVariables[i].index = j+1;
+                        break;
+                    }
+
+                    // Check if this doesn't belong to an M value
+                    bool hasNextM = objectiveItem[j+1].second.getMvalue();
+                    if (hasNextM) {
+                        std::cout << "Has next M " << std::endl;
+                        continue;
+                    }
+
+                    std::cout << "Normal value " << std::endl;
+                    insertedBase.insert(j);
+                    baseVariables[i].value.second = objectiveItem[j].second;
+                    baseVariables[i].index = j+1;
+                }
+
+            } // for (int j = numVariables-1;
+
+            std::cout << "insertedBase.size() " << insertedBase.size() << std::endl
+                      << "(i+1) " << (i+1) << std::endl;
+            if (insertedBase.size() != (i+1)) {
+                --i;
+                std::cout << "Not done" << std::endl;
+                lookForM = false;
+            }
+        }
+
+        std::cout << "Base variables" << std::endl;
+        for (int i = 0; i <  numRestrictions; ++i) {
+            std::cout << "Item: " << baseVariables[i].value.second.to_string() << std::endl;
+            std::cout << "Index: " << baseVariables[i].index << std::endl;
+        }
     }
 
 };
