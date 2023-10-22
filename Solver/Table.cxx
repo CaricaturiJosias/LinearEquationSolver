@@ -18,7 +18,7 @@ namespace Solver {
 
     Table::Table(LinearSystems::System * toSolveSystem) : systemToSolve(toSolveSystem),
                                                             addedM(0), addedX(0) {
-        
+
         action  = systemToSolve->getAction();
         objective  = systemToSolve->getAction();
 
@@ -38,13 +38,16 @@ namespace Solver {
         // insert them and adjust the restrictions
         decideBaseVariables();
 
+        defineTable();
+        std::cout << "Exited define" << std::endl;
+
+        std::cout << to_string() << std::endl;
+
+        std::cout << "CABO" << std::endl;
     }
 
     Table::~Table() {
-        free(baseVariables);
     }
-
-
 
     void Table::reviewSystem() {
         LinearSystems::Restriction * restrictions = systemToSolve->getRestrictions();
@@ -74,11 +77,11 @@ namespace Solver {
         systemToSolve->setVariableNumber(artificialVariables.size() + systemToSolve->getNumberOfVariables());
 
         bool isFirst = false;
+
         for (int i = 0; i < restrictionNbr && restrictions != nullptr; i++, restrictions++) {
             isFirst = i == 0;
             restrictions->addArtificialVariable(artificialVariables, isFirst);
         }
-
 
     }
 
@@ -123,7 +126,6 @@ namespace Solver {
         LinearSystems::restrictionItem *  objectiveItem = systemToSolve->getObjective()->getRestriction();
 
         int numVariables = systemToSolve->getNumberOfVariables();
-        std::cout << "Number of variables " << numVariables << std::endl;
         int numRestrictions = systemToSolve->getNumberOfRestrictions();
 
         bool lookForM = true;
@@ -145,12 +147,10 @@ namespace Solver {
                 alreadyIn  = insertedBase.find(j) != insertedBase.end();
                 hasMvalue = objectiveItem[j].second.getMvalue();
                 if (alreadyIn) {
-                     std::cout << "Already in" << std::endl;
                     continue;
                 }
 
                 if (lookForM && hasMvalue) {
-                    std::cout << "lookForM && hasMvalue " << std::endl;
                     insertedBase.insert(j);
                     baseVariables[i].value.second = objectiveItem[j].second;
                     baseVariables[i].index = j+1;
@@ -158,7 +158,6 @@ namespace Solver {
                 } // if (lookForM && hasMvalue)
 
                 if (!lookForM) {
-                    std::cout << "!lookForM " << std::endl;
                     // Last item? we cannot reach this if its a M value in the end
                     if (j == (numVariables-1)) {
                         insertedBase.insert(j);
@@ -170,11 +169,9 @@ namespace Solver {
                     // Check if this doesn't belong to an M value
                     bool hasNextM = objectiveItem[j+1].second.getMvalue();
                     if (hasNextM) {
-                        std::cout << "Has next M " << std::endl;
                         continue;
                     }
 
-                    std::cout << "Normal value " << std::endl;
                     insertedBase.insert(j);
                     baseVariables[i].value.second = objectiveItem[j].second;
                     baseVariables[i].index = j+1;
@@ -182,20 +179,98 @@ namespace Solver {
 
             } // for (int j = numVariables-1;
 
-            std::cout << "insertedBase.size() " << insertedBase.size() << std::endl
-                      << "(i+1) " << (i+1) << std::endl;
-            if (insertedBase.size() != (i+1)) {
+            if (insertedBase.size() < (i+1)) {
                 --i;
-                std::cout << "Not done" << std::endl;
                 lookForM = false;
             }
         }
 
-        std::cout << "Base variables" << std::endl;
-        for (int i = 0; i <  numRestrictions; ++i) {
-            std::cout << "Item: " << baseVariables[i].value.second.to_string() << std::endl;
-            std::cout << "Index: " << baseVariables[i].index << std::endl;
-        }
+    }
+
+    void Table::defineTable() {
+        /**
+         * The table should be 
+         * columns:
+         * 1 + number of variables + 2
+         * 
+         * lines:
+         * 1 + number of restrictions + 1
+        */
+        int numVar = systemToSolve->getNumberOfVariables();
+        int numRes = systemToSolve->getNumberOfRestrictions();
+
+        LinearSystems::Restriction * restriction = systemToSolve->getRestrictions();
+        
+        LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
+
+        // Build the objective line
+        std::vector<Value::Number> toInsert;
+
+        toInsert.push_back(Value::Number(0,0));
+        for (int i = 0; i <= numVar+1; ++i) {
+            if (i == numVar) {
+                // Avoid symbol
+                toInsert.push_back(objective[i+1].second);
+                continue;
+            } // if (i == numVar
+            toInsert.push_back(objective[i].second);
+        } // for (int i = 0
+        tableArray.push_back(toInsert);
+
+        toInsert.clear();
+        toInsert.push_back(Value::Number(0,0));
+
+        // Build the restriction lines
+        for (int i = 0;  i <= numRes; ++i) {
+            toInsert.clear();
+            toInsert.push_back(baseVariables[i].value.second);
+            LinearSystems::restrictionItem * restrictionIt =  restriction[i].getRestriction();
+            for (int j = 0;  j <= numVar+1; ++j) {
+                if (j == numVar) {
+                    toInsert.push_back(restrictionIt[j+1].second);
+                    continue;
+                } // if (j == numVar
+                toInsert.push_back(restrictionIt[j].second);
+            } // for (int j = 0
+            tableArray.push_back(toInsert);
+        } // for (int i = 0
+
+        toInsert.clear();
+
+        // Build the base variable line
+        for (int i =  1; i < numRes; ++i) {
+            toInsert.push_back(baseVariables[i].value.second);
+        } // for (int i =  1
+    }
+    
+    std::string Table::to_string() {
+
+        std::string output;
+
+        int numVar = systemToSolve->getNumberOfVariables();
+        int numRes = systemToSolve->getNumberOfRestrictions();
+        LinearSystems::Restriction * restriction = systemToSolve->getRestrictions();
+        LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
+        std::cout << "NumVar: " << numVar << std::endl 
+                  << "NumRes: " << numRes << std::endl;
+        output = " | Base | ";
+
+        for (int i = 1;  i <= numVar; ++i) {
+            output += "x"+std::to_string(i) + " | ";
+        } // for (int i = 0
+
+        output += "b | Theta |\n";
+        for (int i = 0;  i <= numRes; ++i) {
+            std::cout << "i: " << i <<std::endl;
+            std::cout << "Size of array in i: " << tableArray[i].size() << std::endl;
+            for (int j = 0;  j <= numVar+1; ++j) {
+                std::cout << "j: " << j <<std::endl;
+                output += " | "+tableArray[i][j].to_string();
+            } // for (int j = 0
+            output += "\n";
+        } // for (int i = 0
+
+        return output;
     }
 
 };

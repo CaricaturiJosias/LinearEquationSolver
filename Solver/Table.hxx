@@ -52,6 +52,10 @@ namespace Solver {
 
             ~Table();
 
+            std::string to_string();
+
+            int returnTable();
+
         private:
 
             void reviewSystem();
@@ -59,6 +63,8 @@ namespace Solver {
             std::vector<LinearSystems::restrictionItem> probeRestriction(LinearSystems::Restriction * restriction, int variableNbr);
 
             void decideBaseVariables();
+
+            void defineTable();
 
             LinearSystems::System * systemToSolve;
 
@@ -69,7 +75,8 @@ namespace Solver {
             LinearSystems::objectiveType objective;
 
             baseVariableItem * baseVariables;
-
+            
+            std::vector< std::vector<Value::Number> > tableArray;
     };
 
 };
