@@ -57,7 +57,7 @@ namespace LinearSystems {
         bool done = false;
         std::string message;
         // Run variables + 1, the +1 is for the symbol and the value on the right
-        for (int i = 0; i < (variableNumber + 2); ++i) {
+        for (int i = 0; i < (variableNumber+2); ++i) {
             input = askForInput(hasSymbol, message);
             bool isInputSymbol = isSymbol(input);
 
@@ -210,11 +210,167 @@ namespace LinearSystems {
     }
 
     void Restriction::displayRestriction() {
-        system(CLEAR_COMMAND);
+        // system(CLEAR_COMMAND);
         std::cout << to_string(restrictionNumber) << std::endl;
     }
 
-    int Restriction::getRestrictionSymbol() {
-        return restrictionInstance[variableNumber].first;
+    Value::Number Restriction::getRestrictionSymbol() {
+        return restrictionInstance[variableNumber].second;
     }
+
+    void Restriction::addArtificialVariable(std::vector<restrictionItem> &symbolVec, bool isFirst) {
+        /**
+         * I have a given restriction
+         * Rn = 1*x1 -4*x2 + 7*x3 <= 10
+         * 
+         * And i have new artificial variables x4, x5, x6, i want to insert them
+         */
+
+        // variableNumber + 1 is for the system without the artificial variables
+
+        int oldVariableNumber = variableNumber;
+        variableNumber += symbolVec.size();
+
+        restrictionItem * newRestrictionInstance = 
+            static_cast<restrictionItem *>(
+                malloc(sizeof(restrictionItem) * (variableNumber+2)));
+
+        bool isNotEqualSign = restrictionInstance[oldVariableNumber].second.getValue() != symbolEnum::EQUAL;
+        /**
+         * If the variable is below the oldVariable number, just copy
+         * 
+         * If it is aboce the oldVariable number and is not == to the new variableNumber (symbol index)
+         * 
+         * then insert symbolVec[i-oldVariableNumber] which is the 
+         * artificial variable until the new symbol inedx
+         */
+        
+        // Each restrictions can have in maximum 2 artificial
+        bool changeDone = false;
+
+        for (int i = 0; i < (variableNumber+2); ++i) {
+            
+            bool isLastArtificial = i == (variableNumber-1);
+
+            if (i < oldVariableNumber) {
+                newRestrictionInstance[i] = restrictionInstance[i];
+
+            } else if (i < variableNumber) {
+
+                // Is the first restriction of the system and iterator is on the first artificial
+                if (((i-oldVariableNumber) == 0) && isFirst) {
+                    symbolVec[i-oldVariableNumber].second.setValue(1);
+                }
+
+                // Current value is the one with 1, ignore the ones with 0
+                // save it, set the next one to 1, zero out the current
+                double currentItem = symbolVec[i-oldVariableNumber].second.getValue();
+                double isMItem = symbolVec[i-oldVariableNumber].second.getMvalue();
+
+                if (currentItem == 1 && !changeDone) {
+                    changeDone = true;
+
+                    // values with M are isolated, so (1,1)
+                    if (isMItem) {
+                        // We want to save (0,1) so it doesnt comes out as (1 -1M)*xn but -1M*xn
+                        symbolVec[i-oldVariableNumber].second.setValue(0);
+                    }
+
+                    // If it contains an = already, we don't save any with 1
+                    if (!isNotEqualSign) {
+                        symbolVec[i-oldVariableNumber].second.setValue(0);
+                        symbolVec[i-oldVariableNumber].second.setMValue(0);
+                    }
+
+                    newRestrictionInstance[i] = symbolVec[i-oldVariableNumber];
+
+                    // Set up next variable
+                    symbolVec[i-oldVariableNumber].second.setValue(0);
+
+                    // If its the last item skips this, avoid core dump and resets all items
+                    if (!isLastArtificial) {
+                        symbolVec[i-oldVariableNumber + 1].second.setValue(1);
+                        bool isNextM = symbolVec[i-oldVariableNumber + 1].second.getMvalue();
+                        // Some restrictions might have more than one artificial variable allowed
+                        // And the second is always an M item, there is NEVER an restriction with
+                        // Just a M item
+
+                        if (isNextM) {
+                            changeDone = false;
+                        }
+                    }
+
+                    // Revert M item for next restriction for any restriction with =
+                    if (!isNotEqualSign && isMItem) {
+                        symbolVec[i-oldVariableNumber].second.setMValue(1);
+                    }
+                }
+            } else {
+                // For each step after the end of symbolVec, we should target symbol and result from
+                // restrictionInstance (hence taking the size of artificial variables from i)
+                newRestrictionInstance[i] = restrictionInstance[i-symbolVec.size()];
+
+                // Replace the symbol <= or >= with =
+                if (i == variableNumber && isNotEqualSign) {
+                    newRestrictionInstance[i].second.setValue(symbolEnum::EQUAL);
+                }
+            }
+        }
+        free(restrictionInstance);
+
+        restrictionInstance = newRestrictionInstance;
+    }
+    
+    void Restriction::addArtificialVariableToObjective(std::vector<restrictionItem> &symbolVec) {
+         /**
+         * I have a given objective
+         * Rn = 1*x1 -4*x2 + 7*x3 <= 10
+         * 
+         * And i have new artificial variables x4, x5, x6, i want to insert them AS 0
+         */
+
+        int oldVariableNumber = variableNumber;
+        variableNumber += symbolVec.size();
+
+        restrictionItem * newObjetiveInstance = 
+            static_cast<restrictionItem *>(
+                malloc(sizeof(restrictionItem) * (variableNumber+2)));
+
+        bool isNotEqualSign = restrictionInstance[oldVariableNumber].second.getValue() != symbolEnum::EQUAL;
+        /**
+         * If the variable is below the oldVariable number, just copy
+         * 
+         * If it is aboce the oldVariable number and is not == to the new variableNumber (symbol index)
+         * 
+         * then insert symbolVec[i-oldVariableNumber] which is the 
+         * artificial variable until the new symbol inedx
+         */
+        
+        // Each restrictions can have in maximum 2 artificial
+        for (int i = 0; i < (variableNumber+2); ++i) {
+
+            if (i < oldVariableNumber) {
+                newObjetiveInstance[i] = restrictionInstance[i];
+
+            } else if (i < variableNumber) {
+
+                newObjetiveInstance[i] = symbolVec[i-oldVariableNumber];
+
+            } else {
+                // For each step after the end of symbolVec, we should target symbol and result from
+                // restrictionInstance (hence taking the size of artificial variables from i)
+                newObjetiveInstance[i] = restrictionInstance[i-symbolVec.size()];
+
+                // Replace the symbol <= or >= with =
+                if (i == variableNumber && isNotEqualSign) {
+                    newObjetiveInstance[i].second.setValue(symbolEnum::EQUAL);
+                }
+            }
+        }
+
+        free(restrictionInstance);
+
+        restrictionInstance = newObjetiveInstance;
+    }
+
 };

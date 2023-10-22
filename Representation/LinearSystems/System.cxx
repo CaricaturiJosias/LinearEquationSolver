@@ -68,6 +68,7 @@ namespace LinearSystems {
     }
 
     System::~System() {
+
     }
 
     void System::buildObjective() {

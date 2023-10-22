@@ -34,6 +34,9 @@ namespace Value {
             double getValue() { return value; }
             double getMvalue() { return Mvalue; }
 
+            void setValue(double newValue) { value = newValue; }
+            void setMValue(double newValue) { Mvalue = newValue; }
+
             Number& operator=(Number input);
             Number& operator=(double input);
             Number& operator=(std::string input);

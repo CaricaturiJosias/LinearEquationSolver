@@ -102,9 +102,11 @@ namespace LinearSystems {
             
             int getVariableNumber() { return variableNumber; }
 
-            int getRestrictionSymbol();
+            Value::Number getRestrictionSymbol();
 
-            void addArtificialVariable(std::vector<std::string> symbolVec);
+            void addArtificialVariable(std::vector<restrictionItem> &symbolVec, bool isFirst);
+
+            void addArtificialVariableToObjective(std::vector<restrictionItem> &symbolVec);
 
     };
 
