@@ -179,7 +179,7 @@ namespace LinearSystems {
         std::string symbol;
         for (int i = 0; i < (variableNumber+2); ++i) {
             if (i == variableNumber) { // Its a symbol
-                symbol = symbolMap[restrictionInstance[i].second.getValue()];
+                symbol = symbolMap[static_cast<int>(restrictionInstance[i].second.getValue())];
                 if (symbol.empty()) {
                     output += " symbol";
                 } else {
@@ -214,4 +214,7 @@ namespace LinearSystems {
         std::cout << to_string(restrictionNumber) << std::endl;
     }
 
+    int Restriction::getRestrictionSymbol() {
+        return restrictionInstance[variableNumber].first;
+    }
 };

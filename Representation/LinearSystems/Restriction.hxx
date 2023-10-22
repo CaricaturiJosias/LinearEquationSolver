@@ -92,6 +92,12 @@ namespace LinearSystems {
             
             std::string to_string(int line = 0);
 
+            int getRestrictionNumber() { return restrictionNumber; }
+            
+            int getVariableNumber() { return variableNumber; }
+
+            int getRestrictionSymbol();
+
     };
 
 };

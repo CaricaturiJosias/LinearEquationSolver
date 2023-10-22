@@ -49,5 +49,7 @@ namespace LinearSystems {
             Restriction * getRestrictions() { return restrictions; }
             Restriction * getObjective() { return objective; }
             objType getAction() { return objectiveAction; }
+
     };
+
 };
