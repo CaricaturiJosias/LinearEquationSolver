@@ -15,7 +15,8 @@ SOURCES.cxx = \
 	Representation/LinearSystems/Restriction.cxx \
 	Representation/LinearSystems/System.cxx \
 	Representation/Values/Number.cxx \
-	Solver/Simplex.cxx
+	Solver/Simplex.cxx \
+	Solver/Table.cxx
 
 BINDIR = ./bin
 

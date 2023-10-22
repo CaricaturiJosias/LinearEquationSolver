@@ -87,7 +87,7 @@ namespace LinearSystems {
 
             restrictionInstance[i] = 
                 restrictionItem{
-                    isInputSymbol,
+                    static_cast<variableType>(isInputSymbol),
                     valueToStore};
         };
         displayRestriction();
@@ -106,7 +106,7 @@ namespace LinearSystems {
         for (int j = symbolIndex; j < variableNumber; j++) {
             restrictionInstance[j] = 
                 restrictionItem{
-                    false, // Normal value
+                    variableType::VALUE, // Normal value
                     0};
             symbolIndex = variableNumber;
         }

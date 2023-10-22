@@ -14,10 +14,12 @@
 // #include "Representation/Values/Number.hxx"
 #include "Representation/LinearSystems/Restriction.hxx"
 #include "Representation/LinearSystems/System.hxx"
+#include "Solver/Table.hxx"
 
 int main () {
     // Get input from user
     // LinearSystems::Restriction * restriction = new LinearSystems::Restriction();
     LinearSystems::System * system = new LinearSystems::System();
+    Solver::Table table(*system);
     // Show final setup
 }

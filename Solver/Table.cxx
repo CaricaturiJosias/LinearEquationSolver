@@ -10,14 +10,18 @@
  */
 
 #include "Table.hxx"
+#include "../Representation/Values/Number.hxx"
+#include <iostream>
 
 namespace Solver {
 
     Table::Table(LinearSystems::System linearSystem) : 
         systemToSolve(linearSystem),
         addedM(0), addedX(0),
+        action(linearSystem.getAction()),
         objective(linearSystem.getAction()) {
         // nothing so far huh
+        reviewSystem();
     }
 
     Table::~Table() {
@@ -31,30 +35,57 @@ namespace Solver {
         int restrictionNbr = systemToSolve.getNumberOfRestrictions();
         int variableNbr = systemToSolve.getNumberOfVariables();
 
+        std::vector<LinearSystems::restrictionItem> artificialVariables;
+        std::vector<LinearSystems::restrictionItem> results;
         for (int i = 0; i < restrictionNbr && restrictions != nullptr; i++, restrictions++) {
-            redefineRestriction(restrictions, variableNbr);
+            results = probeRestriction(restrictions, variableNbr);
+            // For all added variables
+            for (LinearSystems::restrictionItem artificialVar : results) {
+                artificialVariables.push_back(artificialVar);
+            }
+        }
+        for (auto item: artificialVariables){
+            std::cout << item.second.to_string() << std::endl;
         }
 
     }
 
-    void Table::redefineRestriction(LinearSystems::Restriction * restriction, int variableNbr) {
+    std::vector<LinearSystems::restrictionItem> Table::probeRestriction(LinearSystems::Restriction * restriction, int variableNbr) {
         /**
          * Locate the symbol, check it and if needed revamp the variables
          */
+        std::vector<LinearSystems::restrictionItem> result;
         int varNbr = restriction->getVariableNumber();
         
         LinearSystems::symbolEnum restrictionSymbol = 
             static_cast<LinearSystems::symbolEnum>(restriction->getRestrictionSymbol());
 
         // What do we do with < and >?
-        bool needsToBeAdjusted =(restrictionSymbol == LinearSystems::symbolEnum::LOWER_EQUAL) ||
-                                (restrictionSymbol == LinearSystems::symbolEnum::HIGHER_EQUAL);
+        bool needsToBeAdjusted =   ((restrictionSymbol == LinearSystems::symbolEnum::LOWER_EQUAL)||
+                                    (restrictionSymbol == LinearSystems::symbolEnum::HIGHER_EQUAL));
         if (!needsToBeAdjusted) {
-            return;
+            return result;
         }
 
         // Adjusting
+        LinearSystems::restrictionItem * restrictionData = restriction->getRestriction();
+        // int variableNbr = restriction->getVariableNumber();
 
+        // We want to have only =
+        ++addedX; // We always need to add an X variable, not always an M variable
+        Value::Number valueX(0, 0);
+        result.push_back(LinearSystems::restrictionItem(
+                LinearSystems::variableType::ARTIFICIAL_VARIABLE, valueX));
+
+        bool addM = restrictionSymbol == LinearSystems::symbolEnum::HIGHER_EQUAL;
+        if (addM) {
+            ++addedM;
+            Value::Number valueM(0, -1);
+            result.push_back(LinearSystems::restrictionItem(
+                    LinearSystems::variableType::ARTIFICIAL_VARIABLE, valueM));
+        }
+
+        return result;
     }
 
 };

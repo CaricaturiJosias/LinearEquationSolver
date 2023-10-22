@@ -26,7 +26,7 @@
 namespace LinearSystems {
 
     /**
-     * First item: isSymbol?
+     * First item: isValue, symbol, or artificial?
      * Second item: number itself or symbol enum value
      * 
      * Example:
@@ -34,7 +34,13 @@ namespace LinearSystems {
      * equivalent:
      *      {{0, 2}, {0, 5}, {0, -12}, {1, LOWER_EQUAL}, {0, 20}}
      */
-    typedef bool isSymbol;
+    enum variableType {
+        VALUE,
+        SYMBOL,
+        ARTIFICIAL_VARIABLE
+    };
+
+    typedef variableType isSymbol;
     typedef std::pair<isSymbol, Value::Number> restrictionItem;
 
     enum symbolEnum {
@@ -97,6 +103,8 @@ namespace LinearSystems {
             int getVariableNumber() { return variableNumber; }
 
             int getRestrictionSymbol();
+
+            void addArtificialVariable(std::vector<std::string> symbolVec);
 
     };
 

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../Representation/LinearSystems/System.hxx"
+#include "../Representation/LinearSystems/Restriction.hxx"
 
 /**
  * A table resembles this:
@@ -50,12 +51,13 @@ namespace Solver {
 
             void reviewSystem();
 
-            void redefineRestriction(LinearSystems::Restriction * restriction, int variableNbr);
+            std::vector<LinearSystems::restrictionItem> probeRestriction(LinearSystems::Restriction * restriction, int variableNbr);
 
             LinearSystems::System systemToSolve;
             
             int addedX;
             int addedM;
+            int action;
 
             LinearSystems::objectiveType objective;
     };
