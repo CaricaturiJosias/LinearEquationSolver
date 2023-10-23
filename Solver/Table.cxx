@@ -206,24 +206,24 @@ namespace Solver {
         // Build the objective line
         std::vector<Value::Number> toInsert;
 
-        toInsert.push_back(Value::Number(0,0));
-        for (int i = 0; i <= numVar+1; ++i) {
-            if (i == numVar) {
-                // Avoid symbol
-                toInsert.push_back(objective[i+1].second);
-                continue;
-            } // if (i == numVar
-            toInsert.push_back(objective[i].second);
-        } // for (int i = 0
-        tableArray.push_back(toInsert);
+        // toInsert.push_back(Value::Number(0,0));
+        // for (int i = 0; i <= numVar+1; ++i) {
+        //     if (i == numVar) {
+        //         // Avoid symbol
+        //         toInsert.push_back(objective[i+1].second);
+        //         continue;
+        //     } // if (i == numVar
+        //     toInsert.push_back(objective[i].second);
+        // } // for (int i = 0
+        // tableArray.push_back(toInsert);
 
-        toInsert.clear();
-        toInsert.push_back(Value::Number(0,0));
+        // toInsert.clear();
+        // toInsert.push_back(Value::Number(0,0));
 
         // Build the restriction lines
         for (int i = 0;  i <= numRes; ++i) {
             toInsert.clear();
-            toInsert.push_back(baseVariables[i].value.second);
+            // toInsert.push_back(baseVariables[i].value.second);
             LinearSystems::restrictionItem * restrictionIt =  restriction[i].getRestriction();
             for (int j = 0;  j <= numVar+1; ++j) {
                 if (j == numVar) {
@@ -253,22 +253,30 @@ namespace Solver {
         LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
         std::cout << "NumVar: " << numVar << std::endl 
                   << "NumRes: " << numRes << std::endl;
-        output = " | Base | ";
+        output = "| Base | ";
 
-        for (int i = 1;  i <= numVar; ++i) {
-            output += "x"+std::to_string(i) + " | ";
+        
+        for (int i = 0;  i < numVar; ++i) {
+            output += objective[i].second.to_string() + "*x"+std::to_string(i+1) + " | ";
         } // for (int i = 0
 
         output += "b | Theta |\n";
-        for (int i = 0;  i <= numRes; ++i) {
-            std::cout << "i: " << i <<std::endl;
-            std::cout << "Size of array in i: " << tableArray[i].size() << std::endl;
+        for (int i = 0;  i < numRes; ++i) {
             for (int j = 0;  j <= numVar+1; ++j) {
-                std::cout << "j: " << j <<std::endl;
-                output += " | "+tableArray[i][j].to_string();
-            } // for (int j = 0
+                // Base variables that are not the first
+                if (j == 0) {
+                    // Base variable: value itself (ie. 2 - 3*M) and them
+                    // index of the variable (ie. x8)
+                    // We would have for example: (2-3*M)*x8
+                    output += "|" + baseVariables[i].value.second.to_string() +
+                            "*x"  + std::to_string(baseVariables[i].index);
+                    continue;
+                } // if (j == 0)
+                // Include a Number into the output ' | 2 -2*M' as an example
+                output += " | "+tableArray[i][j-1].to_string();
+            } // for (int j = 0;  j <= numVar+1; ++j)
             output += "\n";
-        } // for (int i = 0
+        } // for (int i = 0;  i <= numRes; ++i)
 
         return output;
     }
