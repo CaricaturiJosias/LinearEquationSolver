@@ -66,6 +66,8 @@ namespace Solver {
 
             void defineTable();
 
+            static std::string printSizing(std::string toSizeInput);
+
             LinearSystems::System * systemToSolve;
 
             int addedX;
@@ -77,6 +79,7 @@ namespace Solver {
             baseVariableItem * baseVariables;
             
             std::vector< std::vector<Value::Number> > tableArray;
+
     };
 
 };

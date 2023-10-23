@@ -12,6 +12,7 @@
 #include "Table.hxx"
 #include "../Representation/Values/Number.hxx"
 #include <iostream>
+#include <string>
 #include <set>
 
 namespace Solver {
@@ -154,7 +155,8 @@ namespace Solver {
                     insertedBase.insert(j);
                     baseVariables[i].value.second = objectiveItem[j].second;
                     baseVariables[i].index = j+1;
-                    break;
+                    j = numVariables-1;
+                    continue;
                 } // if (lookForM && hasMvalue)
 
                 if (!lookForM) {
@@ -163,7 +165,8 @@ namespace Solver {
                         insertedBase.insert(j);
                         baseVariables[i].value.second = objectiveItem[j].second;
                         baseVariables[i].index = j+1;
-                        break;
+                        j = numVariables-1;
+                        continue;
                     }
 
                     // Check if this doesn't belong to an M value
@@ -179,12 +182,17 @@ namespace Solver {
 
             } // for (int j = numVariables-1;
 
+            // The number of base variables must match the number of the current restriction
             if (insertedBase.size() < (i+1)) {
                 --i;
                 lookForM = false;
             }
         }
-
+        std::cout << "Size of base: " << std::to_string(insertedBase.size()) << std::endl;
+        for (int i = 0; i < insertedBase.size(); ++i) {
+            std::cout << "i = " << i << std::endl << baseVariables[i].value.second.to_string() << std::endl 
+                      << std::to_string(baseVariables[i].index) << std::endl;
+        }
     }
 
     void Table::defineTable() {
@@ -206,41 +214,27 @@ namespace Solver {
         // Build the objective line
         std::vector<Value::Number> toInsert;
 
-        // toInsert.push_back(Value::Number(0,0));
-        // for (int i = 0; i <= numVar+1; ++i) {
-        //     if (i == numVar) {
-        //         // Avoid symbol
-        //         toInsert.push_back(objective[i+1].second);
-        //         continue;
-        //     } // if (i == numVar
-        //     toInsert.push_back(objective[i].second);
-        // } // for (int i = 0
-        // tableArray.push_back(toInsert);
-
-        // toInsert.clear();
-        // toInsert.push_back(Value::Number(0,0));
-
         // Build the restriction lines
         for (int i = 0;  i <= numRes; ++i) {
             toInsert.clear();
-            // toInsert.push_back(baseVariables[i].value.second);
             LinearSystems::restrictionItem * restrictionIt =  restriction[i].getRestriction();
-            for (int j = 0;  j <= numVar+1; ++j) {
+            for (int j = 0;  j <= numVar; ++j) {
                 if (j == numVar) {
                     toInsert.push_back(restrictionIt[j+1].second);
                     continue;
-                } // if (j == numVar
+                }
                 toInsert.push_back(restrictionIt[j].second);
+
+                // Add default theta value (0)
+                if (j == numVar) {
+                    toInsert.push_back(Value::Number(0,0));
+                }
+
             } // for (int j = 0
             tableArray.push_back(toInsert);
         } // for (int i = 0
 
         toInsert.clear();
-
-        // Build the base variable line
-        for (int i =  1; i < numRes; ++i) {
-            toInsert.push_back(baseVariables[i].value.second);
-        } // for (int i =  1
     }
     
     std::string Table::to_string() {
@@ -253,31 +247,55 @@ namespace Solver {
         LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
         std::cout << "NumVar: " << numVar << std::endl 
                   << "NumRes: " << numRes << std::endl;
-        output = "| Base | ";
+        output = printSizing("| Base ");
 
-        
         for (int i = 0;  i < numVar; ++i) {
-            output += objective[i].second.to_string() + "*x"+std::to_string(i+1) + " | ";
+            output += printSizing( " | " + objective[i].second.to_string() + "*x"+std::to_string(i+1));
         } // for (int i = 0
 
-        output += "b | Theta |\n";
+        output += printSizing(" | b ");
+        output += printSizing(" | Theta");
+        output += "\n";
+
         for (int i = 0;  i < numRes; ++i) {
-            for (int j = 0;  j <= numVar+1; ++j) {
+            for (int j = 0;  j <= numVar+2; ++j) {
                 // Base variables that are not the first
                 if (j == 0) {
                     // Base variable: value itself (ie. 2 - 3*M) and them
                     // index of the variable (ie. x8)
                     // We would have for example: (2-3*M)*x8
-                    output += "|" + baseVariables[i].value.second.to_string() +
-                            "*x"  + std::to_string(baseVariables[i].index);
+                    output += printSizing("|" + baseVariables[i].value.second.to_string() +
+                            "*x"  + std::to_string(baseVariables[i].index));
                     continue;
                 } // if (j == 0)
                 // Include a Number into the output ' | 2 -2*M' as an example
-                output += " | "+tableArray[i][j-1].to_string();
+                output += printSizing(" | "+tableArray[i][j-1].to_string());
+                // if ( j == numVar+1) {
+                //     output += " |";
+                // }
             } // for (int j = 0;  j <= numVar+1; ++j)
             output += "\n";
         } // for (int i = 0;  i <= numRes; ++i)
 
+        return output;
+    }
+
+    std::string Table::printSizing(std::string toSizeInput) {
+        std::string base = "          ";
+        std::string output;
+        // Fits the bill
+        if (base.size() == toSizeInput.size()) {
+            output = toSizeInput;
+        } else if (base.size() > toSizeInput.size()) { // Add n blank spaces
+            int diff = base.size() - toSizeInput.size();
+            output = toSizeInput;
+            for (int i = 0; i < diff; ++i) {
+                output += " ";
+            }
+        } else { // Input is higher that max value
+            toSizeInput.resize(base.size());
+            output = toSizeInput;
+        }
         return output;
     }
 

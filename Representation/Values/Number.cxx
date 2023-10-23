@@ -176,7 +176,9 @@ namespace Value {
     }
 
     std::string Number::to_string() {
-        if (Mvalue == 0) {
+        if (Mvalue == 0 && value == 0) {
+            return "0";
+        } else if (Mvalue == 0) {
             return roundValue(value);
         } else if (value == 0) {
             return roundValue(-Mvalue) + "*M";
