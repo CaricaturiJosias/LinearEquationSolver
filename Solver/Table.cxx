@@ -155,8 +155,7 @@ namespace Solver {
                     insertedBase.insert(j);
                     baseVariables[i].value.second = objectiveItem[j].second;
                     baseVariables[i].index = j+1;
-                    j = numVariables-1;
-                    continue;
+                    break;
                 } // if (lookForM && hasMvalue)
 
                 if (!lookForM) {
@@ -165,8 +164,7 @@ namespace Solver {
                         insertedBase.insert(j);
                         baseVariables[i].value.second = objectiveItem[j].second;
                         baseVariables[i].index = j+1;
-                        j = numVariables-1;
-                        continue;
+                        break;
                     }
 
                     // Check if this doesn't belong to an M value
@@ -178,12 +176,14 @@ namespace Solver {
                     insertedBase.insert(j);
                     baseVariables[i].value.second = objectiveItem[j].second;
                     baseVariables[i].index = j+1;
+                    break;
                 }
 
             } // for (int j = numVariables-1;
-
-            // The number of base variables must match the number of the current restriction
-            if (insertedBase.size() < (i+1)) {
+            std::cout   << "i: " << i << std::endl
+                        << "size: " << insertedBase.size() << std::endl;
+            // The number of base variables must match the number of the current restriction + 1
+            if (insertedBase.size() != (i+1)) {
                 --i;
                 lookForM = false;
             }
