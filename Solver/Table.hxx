@@ -58,6 +58,8 @@ namespace Solver {
 
             std::vector< std::vector<Value::Number> > getTable() { return tableArray; }
 
+            void calculateCjZj();
+
         private:
 
             void reviewSystem();
@@ -75,6 +77,8 @@ namespace Solver {
             int addedX;
             int addedM;
             int action;
+            int numVar;
+            int numRes;
 
             LinearSystems::objectiveType objective;
 

@@ -46,21 +46,28 @@ namespace Solver {
     void Simplex::solverMain() {
 
         bool notSolved = true;
-        while (notSolved) {
+        std::cout << "Calculate CjZj" << std::endl;
+        tableInstance->calculateCjZj();
+        std::cout << "Calculated CjZj" << std::endl;
+        std::cout << tableInstance->to_string() << std::endl;
+        // while (notSolved) {
 
-            /**
-             * Steps
-             * 
-             * 1 - Calculate (Cj - Zj)
-             * 
-             * 2 - 
-             * 
-             * 3 - 
-             * 
-             * 4 - 
-            */
-
-        }
+        //     /**
+        //      * Steps
+        //      * 
+        //      * 1 - Calculate (Cj - Zj)
+        //      * 
+        //      * 2 - Find higher value
+        //      * 
+        //      * 3 - Calculate Theta
+        //      * 
+        //      * 4 - Assign pivot variable
+        //      * 
+        //      * 5 - Change base variables
+        //      * 
+        //      * 6 - Calculate the next matrix
+        //     */
+        // }
     }
 
 };

@@ -11,6 +11,7 @@
 
 #include "Table.hxx"
 #include "../Representation/Values/Number.hxx"
+#include "../Representation/LinearSystems/Restriction.hxx"
 #include <iostream>
 #include <string>
 #include <set>
@@ -196,14 +197,11 @@ namespace Solver {
          * lines:
          * 1 + number of restrictions + 1
         */
-        int numVar = systemToSolve->getNumberOfVariables();
-        int numRes = systemToSolve->getNumberOfRestrictions();
+        numVar = systemToSolve->getNumberOfVariables();
+        numRes = systemToSolve->getNumberOfRestrictions();
 
         LinearSystems::Restriction * restriction = systemToSolve->getRestrictions();
         
-        LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
-
-        // Build the objective line
         std::vector<Value::Number> toInsert;
 
         // Build the restriction lines
@@ -214,8 +212,19 @@ namespace Solver {
                 if (j == numVar) {
                     toInsert.push_back(restrictionIt[j+1].second);
                     continue;
+                } else if (restrictionIt[j].second.getMvalue()) { // Turn M value into normal value
+                    toInsert.push_back(Value::Number(restrictionIt[j].second.getMvalue()));
+                    continue;
                 }
-                toInsert.push_back(restrictionIt[j].second);
+                if (j < numVar) {
+                    if (restrictionIt[j+1].second.getMvalue()) {
+                        toInsert.push_back(restrictionIt[j].second*-1);
+                    } else {
+                        toInsert.push_back(restrictionIt[j].second);    
+                    }
+                } else {
+                    toInsert.push_back(restrictionIt[j].second);
+                }
 
                 // Add default theta value (0)
                 if (j == numVar) {
@@ -237,8 +246,6 @@ namespace Solver {
 
         std::string output;
 
-        int numVar = systemToSolve->getNumberOfVariables();
-        int numRes = systemToSolve->getNumberOfRestrictions();
         LinearSystems::Restriction * restriction = systemToSolve->getRestrictions();
         LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
         std::cout << "NumVar: " << numVar << std::endl 
@@ -279,7 +286,7 @@ namespace Solver {
     }
 
     std::string Table::printSizing(std::string toSizeInput) {
-        std::string base = "          ";
+        std::string base = "             ";
         std::string output;
         // Fits the bill
         if (base.size() == toSizeInput.size()) {
@@ -295,6 +302,29 @@ namespace Solver {
             output = toSizeInput;
         }
         return output;
+    }
+
+    void Table::calculateCjZj() {
+        /**
+         * Get each column, 
+         * multiply the values with the base on each line
+         * 
+         * 
+         * 
+         */
+
+        LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
+
+        // Each column
+        for (int j = 0; j < numVar; ++j) {
+            // Each value
+            Value::Number current;
+            for (int i = 0; i < numRes; ++i) {
+                current = current + tableArray[i][j] * baseVariables[i].value.second;
+            }
+            tableArray[numRes+1][j] = objectives[j].second - current;
+        }        
+
     }
 
 };

@@ -12,14 +12,10 @@
 #include <string>
 #include <iostream>
 // #include "Representation/Values/Number.hxx"
-#include "Representation/LinearSystems/Restriction.hxx"
-#include "Representation/LinearSystems/System.hxx"
-#include "Solver/Table.hxx"
+#include "Solver/Simplex.hxx"
 
 int main () {
-    // Get input from user
-    // LinearSystems::Restriction * restriction = new LinearSystems::Restriction();
-    LinearSystems::System * systemToSolve = new LinearSystems::System();
-    Solver::Table table(systemToSolve);
-    // Show final setup
+
+    Solver::Simplex * simplex = new Solver::Simplex();
+
 }

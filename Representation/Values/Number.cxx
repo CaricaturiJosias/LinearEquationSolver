@@ -85,8 +85,8 @@ namespace Value {
     }
 
     Number& Number::operator*(Number input) {
-        value *= input.getValue();
-        Mvalue *= 0; // No scenarios where it multiplies with M
+        Mvalue = Mvalue*input.getValue() + input.getMvalue()*value; // No scenarios where it multiplies with M and M
+        value = value*input.getValue();
         return *this;
     }
 
