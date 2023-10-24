@@ -40,7 +40,6 @@ namespace Solver {
         decideBaseVariables();
 
         defineTable();
-        std::cout << "Exited define" << std::endl;
 
         std::cout << to_string() << std::endl;
 
@@ -180,18 +179,11 @@ namespace Solver {
                 }
 
             } // for (int j = numVariables-1;
-            std::cout   << "i: " << i << std::endl
-                        << "size: " << insertedBase.size() << std::endl;
             // The number of base variables must match the number of the current restriction + 1
             if (insertedBase.size() != (i+1)) {
                 --i;
                 lookForM = false;
             }
-        }
-        std::cout << "Size of base: " << std::to_string(insertedBase.size()) << std::endl;
-        for (int i = 0; i < insertedBase.size(); ++i) {
-            std::cout << "i = " << i << std::endl << baseVariables[i].value.second.to_string() << std::endl 
-                      << std::to_string(baseVariables[i].index) << std::endl;
         }
     }
 
@@ -235,6 +227,10 @@ namespace Solver {
         } // for (int i = 0
 
         toInsert.clear();
+        for (int j = 0;  j < numVar; ++j) {
+            toInsert.push_back(Value::Number(0,0));
+        }
+        tableArray.push_back(toInsert);
     }
     
     std::string Table::to_string() {
@@ -264,19 +260,21 @@ namespace Solver {
                     // Base variable: value itself (ie. 2 - 3*M) and them
                     // index of the variable (ie. x8)
                     // We would have for example: (2-3*M)*x8
-                    output += printSizing("|" + baseVariables[i].value.second.to_string() +
+                    output += printSizing("| " + baseVariables[i].value.second.to_string() +
                             "*x"  + std::to_string(baseVariables[i].index));
                     continue;
                 } // if (j == 0)
-                // Include a Number into the output ' | 2 -2*M' as an example
-                output += printSizing(" | "+tableArray[i][j-1].to_string());
-                // if ( j == numVar+1) {
-                //     output += " |";
-                // }
+                // Include a Number into the output, we don't want M as it isn't supposed to appear here
+                output += printSizing(" | "+tableArray[i][j-1].to_string_no_m());
             } // for (int j = 0;  j <= numVar+1; ++j)
             output += "\n";
         } // for (int i = 0;  i <= numRes; ++i)
-
+        
+        // Print (Cj - Zj)
+        output += printSizing("| Cj - Zj");
+        for (int j = 0;  j < numVar; ++j) {
+            output += printSizing(" | "+tableArray[numRes+1][j].to_string());
+        }
         return output;
     }
 

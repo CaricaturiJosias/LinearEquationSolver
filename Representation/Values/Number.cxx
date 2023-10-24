@@ -188,6 +188,17 @@ namespace Value {
         return "(" + roundValue(value) + symbol + roundValue(-Mvalue) + "*M)";
     }
 
+    std::string Number::to_string_no_m() {
+        if (Mvalue == 0 && value == 0) {
+            return "0";
+        } else if (Mvalue == 0) {
+            return roundValue(value);
+        } else if (value == 0) {
+            return roundValue(Mvalue);
+        }
+        return "";
+    }
+
     bool Number::hasBothValues() {
         return (
             value != 0 &&

@@ -32,16 +32,35 @@ namespace Solver {
                 inputNotValid = false;
                 chosenOption = static_cast<resolutionOption>(selectedOption);
             }
-
-            // Populate system
-            resolutionOrder = new LinearSystems::System();
-
         }
+        // Populate system
+        LinearSystems::System * toSolveSystem = new LinearSystems::System();
+        tableInstance = new Table(toSolveSystem);
+        solverMain();
     }
 
     Simplex::~Simplex() {
 
     }
 
+    void Simplex::solverMain() {
+
+        bool notSolved = true;
+        while (notSolved) {
+
+            /**
+             * Steps
+             * 
+             * 1 - Calculate (Cj - Zj)
+             * 
+             * 2 - 
+             * 
+             * 3 - 
+             * 
+             * 4 - 
+            */
+
+        }
+    }
 
 };

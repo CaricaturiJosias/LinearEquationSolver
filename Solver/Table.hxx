@@ -56,6 +56,8 @@ namespace Solver {
 
             int returnTable();
 
+            std::vector< std::vector<Value::Number> > getTable() { return tableArray; }
+
         private:
 
             void reviewSystem();

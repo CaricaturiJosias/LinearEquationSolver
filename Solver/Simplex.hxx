@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../Representation/LinearSystems/System.hxx"
+#include "Table.hxx"
 #include <vector>
 
 namespace Solver {
@@ -36,6 +37,9 @@ namespace Solver {
 
             resolutionOption chosenOption;
 
+            void solverMain();
+
+            Table * tableInstance;
     };
 
 };
