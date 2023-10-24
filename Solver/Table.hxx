@@ -44,6 +44,16 @@ namespace Solver {
         int index;
     };
 
+    enum status {
+        WORK,
+        DONE,
+        NO_FRONTIER,
+        NON_VIABLE,
+        DEGENERATED,
+        ALTERNATED_OPTIMAL,
+        CYCLIC,
+    };
+
     class Table {
 
         public:
@@ -59,6 +69,8 @@ namespace Solver {
             std::vector< std::vector<Value::Number> > getTable() { return tableArray; }
 
             void calculateCjZj();
+
+            status evaluateCjZj();
 
         private:
 

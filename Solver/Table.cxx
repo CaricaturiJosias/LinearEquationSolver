@@ -327,4 +327,31 @@ namespace Solver {
 
     }
 
+    status Table::evaluateCjZj() {
+        LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
+        int pivotColumn;
+        Value::Number current = tableArray[numRes+1][0];
+        // Each column
+        for (int j = 0; j < numVar; ++j) {
+            // Keep track of highest column
+            if (current < tableArray[numRes+1][j]) {
+                
+                current = tableArray[numRes+1][j];
+                pivotColumn = j;
+            }   
+        }
+
+        std::cout << "Higher Cj-Zj: " << current.to_string() << std::endl;
+
+        Value::Number zero = Value::Number(0,0);
+        if (current < zero) {
+            return NON_VIABLE;
+        } else if (current == zero) {
+            return DONE;
+        }
+        return WORK;
+    }
+
+
+
 };

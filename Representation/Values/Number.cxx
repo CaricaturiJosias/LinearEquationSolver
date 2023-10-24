@@ -30,7 +30,7 @@ namespace Value {
 
     Number::Number(double inputValue, double inputMvalue) {
         value = inputValue;
-        Mvalue = inputMvalue;
+        Mvalue = -inputMvalue;
     }
 
     Number::Number(double inputValue) {
@@ -132,10 +132,35 @@ namespace Value {
     }
 
     bool Number::operator>(Number input) {
-        if (value == 0 && input.getValue() == 0) {
-            return (Mvalue > input.getMvalue());
+        /**
+         * cases:
+         * 1 + 0M
+         * 1 + 1M
+         * 0 + xM
+         * 0 + 0M
+         * 
+        */
+        
+        if (value > 0) {
+            return value > input.getValue();
+        } else if (input.getValue() > 0) {
+            return false;
+        } else if (Mvalue > 0) { // Both value and input's value are 0 or negative from here
+            return Mvalue > input.getMvalue();
+        } else if (!(value == 0 && input.getValue() == 0)) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
+            return value > input.getValue();
         }
-        return (value > input.getValue());
+        // normal value is hopeless (0 and 0)
+        if (Mvalue > 0) {
+            return Mvalue > input.getMvalue();
+        } else if (input.getMvalue() > 0) {
+            return false;
+        } else if (Mvalue > 0) { // Both Mvalue and input's Mvalue are 0 or negative from here
+            return Mvalue > input.getMvalue();
+        } else if (!(Mvalue == 0 && input.getMvalue() == 0)) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
+            return Mvalue > input.getMvalue();
+        }
+        return false;
     }
 
     bool Number::operator>(double input) {
@@ -184,8 +209,8 @@ namespace Value {
             return roundValue(-Mvalue) + "*M";
         }
 
-        std::string symbol = (Mvalue < 0) ? " +" : " ";
-        return "(" + roundValue(value) + symbol + roundValue(-Mvalue) + "*M)";
+        std::string symbol = (Mvalue > 0) ? " +" : " ";
+        return "(" + roundValue(value) + symbol + roundValue(Mvalue) + "*M)";
     }
 
     std::string Number::to_string_no_m() {
