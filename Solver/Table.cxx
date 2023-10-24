@@ -337,6 +337,7 @@ namespace Solver {
             if (current < tableArray[numRes+1][j]) {
                 
                 current = tableArray[numRes+1][j];
+                // Saves the pivot column for further calculations
                 pivotColumn = j;
             }   
         }
