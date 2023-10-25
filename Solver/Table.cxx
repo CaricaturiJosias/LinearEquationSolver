@@ -329,7 +329,7 @@ namespace Solver {
 
     status Table::evaluateCjZj() {
         LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
-        int pivotColumn;
+        pivotColumn = 0;
         Value::Number current = tableArray[numRes+1][0];
         // Each column
         for (int j = 0; j < numVar; ++j) {
@@ -353,6 +353,8 @@ namespace Solver {
         return WORK;
     }
 
-
+    void Table::calculateTheta() {
+        
+    }
 
 };

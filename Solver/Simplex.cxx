@@ -67,7 +67,11 @@ namespace Solver {
             tableInstance->calculateCjZj();
             std::cout << "Calculated CjZj" << std::endl;
             std::cout << tableInstance->to_string() << std::endl;
-            status solutionStatus = tableInstance->evaluateCjZj();
+            solutionStatus = tableInstance->evaluateCjZj();
+            if (solutionStatus != WORK) {
+                continue;
+            }
+            
 
         }
     }

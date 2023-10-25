@@ -72,6 +72,8 @@ namespace Solver {
 
             status evaluateCjZj();
 
+            c
+
         private:
 
             void reviewSystem();
@@ -91,6 +93,8 @@ namespace Solver {
             int action;
             int numVar;
             int numRes;
+            int pivotColumn;
+            int pivotLine;
 
             LinearSystems::objectiveType objective;
 
