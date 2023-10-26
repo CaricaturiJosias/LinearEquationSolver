@@ -72,7 +72,7 @@ namespace Solver {
 
             status evaluateCjZj();
 
-            c
+            void calculateTheta();
 
         private:
 

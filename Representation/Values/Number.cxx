@@ -30,7 +30,7 @@ namespace Value {
 
     Number::Number(double inputValue, double inputMvalue) {
         value = inputValue;
-        Mvalue = -inputMvalue;
+        Mvalue = inputMvalue;
     }
 
     Number::Number(double inputValue) {
@@ -78,6 +78,7 @@ namespace Value {
         Mvalue -= input.getMvalue();
         return *this;
     }
+
     Number& Number::operator-(double input) {
         value -= input;
         Mvalue -= 0;

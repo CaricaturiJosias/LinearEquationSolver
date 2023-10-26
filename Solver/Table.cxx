@@ -33,17 +33,11 @@ namespace Solver {
         // insert them and adjust the restrictions
         reviewSystem();
 
-        // TODO - REMOVE
-        std::cout << systemToSolve->to_string() << std::endl;
-
         // Checks for artificial variables,
         // insert them and adjust the restrictions
         decideBaseVariables();
 
         defineTable();
-
-        std::cout << to_string() << std::endl;
-
         std::cout << "CABO" << std::endl;
     }
 
@@ -218,7 +212,7 @@ namespace Solver {
                 }
                 if (j < numVar) {
                     if (restrictionIt[j+1].second.getMvalue()) {
-                        toInsert.push_back(restrictionIt[j].second*-1);
+                        toInsert.push_back(restrictionIt[j].second);
                     } else {
                         toInsert.push_back(restrictionIt[j].second);    
                     }
@@ -246,7 +240,6 @@ namespace Solver {
 
         std::string output;
 
-        LinearSystems::Restriction * restriction = systemToSolve->getRestrictions();
         LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
         std::cout << "NumVar: " << numVar << std::endl 
                   << "NumRes: " << numRes << std::endl;
@@ -272,7 +265,7 @@ namespace Solver {
                     continue;
                 } // if (j == 0)
                 // Include a Number into the output, we don't want M as it isn't supposed to appear here
-                output += printSizing(" | "+tableArray[i][j-1].to_string_no_m());
+                output += printSizing(" | "+tableArray[i][j-1].to_string());
             } // for (int j = 0;  j <= numVar+1; ++j)
             output += "\n";
         } // for (int i = 0;  i <= numRes; ++i)
@@ -322,13 +315,12 @@ namespace Solver {
             for (int i = 0; i < numRes; ++i) {
                 current = current + tableArray[i][j] * baseVariables[i].value.second;
             }
-            tableArray[numRes+1][j] = objectives[j].second - current;
+            tableArray[numRes+1][j] = current - objectives[j].second;
         }        
 
     }
 
     status Table::evaluateCjZj() {
-        LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
         pivotColumn = 0;
         Value::Number current = tableArray[numRes+1][0];
         // Each column
@@ -342,8 +334,6 @@ namespace Solver {
             }   
         }
 
-        std::cout << "Higher Cj-Zj: " << current.to_string() << std::endl;
-
         Value::Number zero = Value::Number(0,0);
         if (current < zero) {
             return NON_VIABLE;
@@ -354,7 +344,14 @@ namespace Solver {
     }
 
     void Table::calculateTheta() {
-        
+        std::cout << "pivot column is " << pivotColumn+1 << std::endl;
+        // For each line calculate theta
+        for (int i = 0; i < numRes; ++i) {
+            std::cout   << "Dividing: " << tableArray[i][numRes+1].to_string() << std::endl
+                        << "By: " << tableArray[i][pivotColumn].to_string() << std::endl;
+            tableArray[i][numVar+1] = tableArray[i][numRes+1] / tableArray[i][pivotColumn];
+            std::cout << "Current theta in line " << i << ":" << tableArray[i][numVar+1].to_string() << std::endl;
+        }
     }
 
 };

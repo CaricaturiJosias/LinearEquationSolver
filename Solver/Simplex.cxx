@@ -61,19 +61,20 @@ namespace Solver {
         */
 
         status solutionStatus = status::WORK;
-        while (solutionStatus == WORK) {
-
+        // while (solutionStatus == WORK) {
+            std::cout << tableInstance->to_string() << std::endl;
             std::cout << "Calculate CjZj" << std::endl;
             tableInstance->calculateCjZj();
             std::cout << "Calculated CjZj" << std::endl;
-            std::cout << tableInstance->to_string() << std::endl;
             solutionStatus = tableInstance->evaluateCjZj();
-            if (solutionStatus != WORK) {
-                continue;
-            }
-            
+            std::cout << tableInstance->to_string() << std::endl;
+            // if (solutionStatus != WORK) {
+            //     continue;
+            // }
+            tableInstance->calculateTheta();
+            std::cout << tableInstance->to_string() << std::endl;
 
-        }
+        // }
     }
 
 };
