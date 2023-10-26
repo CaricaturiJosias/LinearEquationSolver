@@ -204,25 +204,15 @@ namespace Solver {
             LinearSystems::restrictionItem * restrictionIt =  restriction[i].getRestriction();
             for (int j = 0;  j <= numVar; ++j) {
                 if (j == numVar) {
-                    toInsert.push_back(restrictionIt[j+1].second);
+                    toInsert.push_back(restrictionIt[j].second);
+                    // Add default theta value (0)
+                    toInsert.push_back(Value::Number(0,0));
                     continue;
                 } else if (restrictionIt[j].second.getMvalue()) { // Turn M value into normal value
                     toInsert.push_back(Value::Number(restrictionIt[j].second.getMvalue()));
                     continue;
-                }
-                if (j < numVar) {
-                    if (restrictionIt[j+1].second.getMvalue()) {
-                        toInsert.push_back(restrictionIt[j].second);
-                    } else {
-                        toInsert.push_back(restrictionIt[j].second);    
-                    }
                 } else {
-                    toInsert.push_back(restrictionIt[j].second);
-                }
-
-                // Add default theta value (0)
-                if (j == numVar) {
-                    toInsert.push_back(Value::Number(0,0));
+                    toInsert.push_back(restrictionIt[j].second);    
                 }
 
             } // for (int j = 0
@@ -230,6 +220,7 @@ namespace Solver {
         } // for (int i = 0
 
         toInsert.clear();
+        // Empty (Cj - Zj)
         for (int j = 0;  j < numVar; ++j) {
             toInsert.push_back(Value::Number(0,0));
         }
@@ -251,6 +242,11 @@ namespace Solver {
 
         output += printSizing(" | b ");
         output += printSizing(" | Theta");
+        output += "\n";
+
+        for (int i = 0; i < numVar+3; ++i) {
+            output += std::string("-------------");
+        }
         output += "\n";
 
         for (int i = 0;  i < numRes; ++i) {
@@ -347,11 +343,26 @@ namespace Solver {
         std::cout << "pivot column is " << pivotColumn+1 << std::endl;
         // For each line calculate theta
         for (int i = 0; i < numRes; ++i) {
-            std::cout   << "Dividing: " << tableArray[i][numRes+1].to_string() << std::endl
-                        << "By: " << tableArray[i][pivotColumn].to_string() << std::endl;
-            tableArray[i][numVar+1] = tableArray[i][numRes+1] / tableArray[i][pivotColumn];
-            std::cout << "Current theta in line " << i << ":" << tableArray[i][numVar+1].to_string() << std::endl;
+            tableArray[i][numVar+1] = tableArray[i][numVar] / tableArray[i][pivotColumn];
         }
+
+        pivotLine = 0;
+        Value::Number current = tableArray[numRes+1][0];
+        // Each column
+        for (int i = 0; i < numRes; ++i) {
+            // Keep track of highest column
+            if (current < tableArray[i][numVar+1]) {
+                
+                current = tableArray[i][numVar+1];
+                // Saves the pivot column for further calculations
+                pivotLine = i;
+            }   
+        }
+        std::cout << "Pivot line: " << pivotLine + 1 << std::endl;
+    }
+
+    void executeIteration() {
+        
     }
 
 };

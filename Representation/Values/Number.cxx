@@ -86,9 +86,11 @@ namespace Value {
     }
 
     Number& Number::operator*(Number input) {
-        Mvalue = Mvalue*input.getValue() + input.getMvalue()*value; // No scenarios where it multiplies with M and M
-        value = value*input.getValue();
-        return *this;
+        Number * result = new Number();
+         // No scenarios where it multiplies with M and M
+        result->setMValue(Mvalue*input.getValue() + input.getMvalue()*value); 
+        result->setValue(value*input.getValue());
+        return *result;
     }
 
     Number& Number::operator*(double input) {
@@ -98,16 +100,17 @@ namespace Value {
     }
 
     Number& Number::operator/(Number input) {
+        Number * result = new Number();
         // No scenarios where it divides by M too
         // But some Number instances might just be normal ints
         if (input.getValue() != 0) {
-            value /= input.getValue();
-            Mvalue /= input.getValue();
+            result->setValue(value /= input.getValue());
+            result->setMValue(Mvalue /= input.getValue());
         } else {
-            value = INT_MAX;
-            Mvalue = INT_MAX;
+            result->setValue(value = INT_MAX);
+            result->setMValue(Mvalue = INT_MAX);
         }
-        return *this;
+        return *result;
     }
 
     Number& Number::operator/(double input) {
@@ -223,7 +226,7 @@ namespace Value {
         } else if (Mvalue == 0) {
             return roundValue(value);
         } else if (value == 0) {
-            return roundValue(-Mvalue) + "*M";
+            return roundValue(Mvalue) + "*M";
         }
 
         std::string symbol = (Mvalue > 0) ? " +" : " ";

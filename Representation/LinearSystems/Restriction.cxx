@@ -89,15 +89,15 @@ namespace LinearSystems {
             restrictionInstance[i] = 
                 restrictionItem{
                     static_cast<variableType>(isInputSymbol),
-                    valueToStore};
+                    Value::Number(valueToStore)};
         };
-        if (type == MIN) {
-            for (int i = 0; i < (variableNumber+2); ++i) {
-                if (restrictionInstance[i].first != SYMBOL) {
-                    restrictionInstance[i].second = restrictionInstance[i].second;
-                }
-            }
-        }
+        // if (type == MIN) {
+        //     for (int i = 0; i < (variableNumber+2); ++i) {
+        //         if (restrictionInstance[i].first != SYMBOL) {
+        //             restrictionInstance[i].second = restrictionInstance[i].second;
+        //         }
+        //     }
+        // }
         displayRestriction();
     }
 
