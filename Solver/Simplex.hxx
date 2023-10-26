@@ -33,13 +33,15 @@ namespace Solver {
 
         private:
 
-            LinearSystems::System * resolutionOrder;
-
             resolutionOption chosenOption;
 
             void solverMain();
 
             Table * tableInstance;
+
+            int iterations;
+
+            std::vector< std::vector<Value::Number> > * resolutionOrder;
     };
 
 };

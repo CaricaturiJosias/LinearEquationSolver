@@ -20,7 +20,6 @@ namespace Solver {
 
     Table::Table(LinearSystems::System * toSolveSystem) : systemToSolve(toSolveSystem),
                                                             addedM(0), addedX(0) {
-
         action  = systemToSolve->getAction();
         objective  = systemToSolve->getAction();
 
@@ -82,7 +81,9 @@ namespace Solver {
 
     std::vector<LinearSystems::restrictionItem> Table::probeRestriction(LinearSystems::Restriction * restriction, int variableNbr) {
         /**
-         * Locate the symbol, check it and if needed revamp the variables
+         * Locate the symbol, check it and if needed change the variables
+         * 
+         * Example: minimize and  >= : creates xn and -Mx(n+1) and sets the symbol as =
          */
         std::vector<LinearSystems::restrictionItem> result;
         int varNbr = restriction->getVariableNumber();
@@ -339,7 +340,7 @@ namespace Solver {
         return WORK;
     }
 
-    void Table::calculateTheta() {
+    status Table::calculateTheta() {
         std::cout << "pivot column is " << pivotColumn+1 << std::endl;
         // For each line calculate theta
         for (int i = 0; i < numRes; ++i) {
@@ -349,6 +350,9 @@ namespace Solver {
         pivotLine = 0;
         Value::Number current = tableArray[numRes+1][0];
         // Each column
+        bool degenerated = false;
+
+        // Checks which is higher
         for (int i = 0; i < numRes; ++i) {
             // Keep track of highest column
             if (current < tableArray[i][numVar+1]) {
@@ -357,12 +361,27 @@ namespace Solver {
                 // Saves the pivot column for further calculations
                 pivotLine = i;
             }   
+            if (current == tableArray[i][numVar+1]) {
+                degenerated = true;
+            } else {
+                degenerated = false;
+            }
         }
+
+        if (degenerated) {
+            return DEGENERATED;
+        } else if (current < Value::Number(0,0)) {
+            return NON_VIABLE;
+        } else if (current == Value::Number(0,0)) {
+            return ALTERNATED_OPTIMAL;
+        }
+
         std::cout << "Pivot line: " << pivotLine + 1 << std::endl;
+        return WORK;
     }
 
-    void executeIteration() {
-        
+    void executeIterationChange() {
+
     }
 
 };

@@ -72,7 +72,9 @@ namespace Solver {
 
             status evaluateCjZj();
 
-            void calculateTheta();
+            status calculateTheta();
+
+            std::vector< std::vector<Value::Number> > getTableArray() { return tableArray; }
 
         private:
 
@@ -101,6 +103,7 @@ namespace Solver {
             baseVariableItem * baseVariables;
             
             std::vector< std::vector<Value::Number> > tableArray;
+
 
     };
 
