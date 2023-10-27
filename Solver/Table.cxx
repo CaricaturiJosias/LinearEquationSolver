@@ -355,25 +355,27 @@ namespace Solver {
         // Each column
         bool degenerated = false;
 
-        // Checks which is higher
+        // Checks which is lower
         for (int i = 0; i < numRes; ++i) {
-            // Keep track of highest column
-            std::cout << "Current highest: " << current.to_string() << std::endl;
-            std::cout << "Challenger: " << tableArray[i][numVar+1].to_string() << std::endl;
-            if (current < tableArray[i][numVar+1]) {
+            // Keep track of lower column
+            if (current > tableArray[i][numVar+1]) {
                 
                 current = tableArray[i][numVar+1];
                 // Saves the pivot column for further calculations
                 pivotLine = i;
-            }   
+            } 
+        }
+        int same = 0;
+        for (int i = 0; i < numRes; ++i) {
             if (current == tableArray[i][numVar+1] && i != 0) {
                 degenerated = true;
+                ++same;
             } else {
                 degenerated = false;
             }
         }
 
-        if (degenerated) {
+        if (same>1) {
             return DEGENERATED;
         } else if (current < Value::Number(0,0)) {
             return NON_VIABLE;
@@ -381,7 +383,6 @@ namespace Solver {
             return ALTERNATED_OPTIMAL;
         }
 
-        std::cout << "Pivot line: " << pivotLine + 1 << std::endl;
         return WORK;
     }
 

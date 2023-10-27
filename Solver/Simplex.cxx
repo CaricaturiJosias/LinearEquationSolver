@@ -73,7 +73,8 @@ namespace Solver {
             if (solutionStatus != WORK) {
                 continue;
             }
-            tableInstance->calculateTheta();
+            solutionStatus = tableInstance->calculateTheta();
+            std::cout << "Status: " << solutionStatus << std::endl;
             std::cout << tableInstance->to_string() << std::endl;
             solutionStatus = DONE;
         }
