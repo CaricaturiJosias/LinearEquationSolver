@@ -53,6 +53,8 @@ namespace Value {
             Number& operator/(Number input);
             Number& operator/(double input);
 
+            Number& operator+=(Number input);
+
             bool operator==(Number input);
             bool operator==(double input);
 

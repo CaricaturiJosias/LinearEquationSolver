@@ -41,7 +41,7 @@ namespace Solver {
 
             int iterations;
 
-            std::vector< std::vector<Value::Number> > * resolutionOrder;
+            Table * resolutionOrder;
     };
 
 };

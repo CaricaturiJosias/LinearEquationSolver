@@ -74,7 +74,9 @@ namespace Solver {
 
             status calculateTheta();
 
-            std::vector< std::vector<Value::Number> > getTableArray() { return tableArray; }
+            void updateBaseVariables();
+
+            void executeIterationChange();
 
         private:
 

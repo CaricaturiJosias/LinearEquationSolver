@@ -125,6 +125,11 @@ namespace Value {
         return *this;
     }
 
+    Number& Number::operator+=(Number input) {
+        *this = *this + input;
+        return *this;
+    }
+
     bool Number::operator==(Number input) {
         if (value == 0 && input.getValue() == 0) {
             return (Mvalue == input.getMvalue());

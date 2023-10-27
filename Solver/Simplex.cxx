@@ -17,6 +17,8 @@
 namespace Solver {
 
     Simplex::Simplex() {
+
+        resolutionOrder = static_cast<Table*>(malloc(sizeof(Table) * 100));
         std::string input;
         bool inputNotValid = true;
         int selectedOption = 0;
@@ -64,17 +66,20 @@ namespace Solver {
         status solutionStatus = status::WORK;
         iterations = 0;
         while (solutionStatus == WORK) {
-            ++iterations;
-            std::cout << tableInstance->to_string() << std::endl;
             tableInstance->calculateCjZj();
             solutionStatus = tableInstance->evaluateCjZj();
-            std::cout << tableInstance->to_string() << std::endl;
-            if (solutionStatus != WORK) {
-                continue;
-            }
+            // if (solutionStatus != WORK) {
+            //     continue;
+            // }
             solutionStatus = tableInstance->calculateTheta();
-            std::cout << tableInstance->to_string() << std::endl;
             solutionStatus = DONE;
+            // Save current table before next iteration
+            Table toSave = *tableInstance;
+            resolutionOrder[iterations] = toSave;
+            ++iterations;
+            std::cout << tableInstance->to_string() << std::endl;
+            tableInstance->updateBaseVariables();
+            std::cout << tableInstance->to_string() << std::endl;
         }
     }
 

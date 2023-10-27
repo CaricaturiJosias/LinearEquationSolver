@@ -226,7 +226,7 @@ namespace Solver {
 
         toInsert.clear();
         // Empty (Cj - Zj)
-        for (int j = 0;  j < numVar; ++j) {
+        for (int j = 0;  j <= numVar; ++j) {
             toInsert.push_back(Value::Number(0,0));
         }
         tableArray.push_back(toInsert);
@@ -272,9 +272,10 @@ namespace Solver {
         
         // Print (Cj - Zj)
         output += printSizing("| Cj - Zj");
-        for (int j = 0;  j < numVar; ++j) {
-            output += printSizing(" | "+tableArray[numRes][j].to_string());
+        for (int j = 0;  j <= numVar; ++j) {
+            output += printSizing(" | "+ tableArray[numRes][j].to_string());
         }
+        output += printSizing(" | ");
         return output;
     }
 
@@ -323,9 +324,11 @@ namespace Solver {
     status Table::evaluateCjZj() {
         pivotColumn = 0;
         Value::Number current = tableArray[numRes][0];
+        Value::Number total = Value::Number(0,0);
         // Each column
         for (int j = 0; j < numVar; ++j) {
             // Keep track of highest column
+            total += tableArray[numRes][j];
             if (current < tableArray[numRes][j]) {
                 
                 current = tableArray[numRes][j];
@@ -333,7 +336,7 @@ namespace Solver {
                 pivotColumn = j;
             }   
         }
-
+        tableArray[numRes][numVar] = total;
         Value::Number zero = Value::Number(0,0);
         if (current < zero) {
             return NON_VIABLE;
@@ -387,8 +390,36 @@ namespace Solver {
         return WORK;
     }
 
-    void executeIterationChange() {
+    void Table::updateBaseVariables() {
+        /**
+         * Now we have the pivot column and line
+         * The line indicates the one gone
+         * The column indicates the one in
+         * 
+         * Now we do the exchange
+        */
+        std::cout << "Updating?" << std::endl;
+        LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
+        std::cout << "Old base variable that will be gone: " << baseVariables[pivotLine].value.second.to_string() << std::endl;
+    
+        baseVariables[pivotLine] = baseVariableItem{objectives[pivotColumn], pivotColumn+1};
+        std::cout << "New base variable that is here now: " << baseVariables[pivotLine].value.second.to_string() << std::endl;
+        // Zero out the Theta column
+        for (int i = 0; i < numRes; ++i) {
+            tableArray[i][numVar+1] = Value::Number(0);
+        }
+        // Zero out the Cj - Zj column
+        for (int i = 0; i <= numVar; ++i) {
+            tableArray[numRes][i] = Value::Number(0);
+        }
+    }
 
+    void Table::executeIterationChange() {
+        /**
+         * WE DON'T THE ENTIRE GAUSS JORDAN, YAY
+         * 
+         * We need however, to 0 out the column of the new base variable
+        */
     }
 
 };
