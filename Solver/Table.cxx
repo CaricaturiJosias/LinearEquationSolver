@@ -20,7 +20,6 @@ namespace Solver {
 
     Table::Table(LinearSystems::System * toSolveSystem) : systemToSolve(toSolveSystem),
                                                             addedM(0), addedX(0) {
-        action  = systemToSolve->getAction();
         objective  = systemToSolve->getAction();
 
         // Same number as number of restrictions
@@ -63,6 +62,7 @@ namespace Solver {
         }
 
         // inserts all the artificial variables into the objective
+
         objective->addArtificialVariableToObjective(artificialVariables);
 
         // start the loop again because we were 
@@ -200,7 +200,7 @@ namespace Solver {
         std::vector<Value::Number> toInsert;
 
         // Build the restriction lines
-        for (int i = 0;  i <= numRes; ++i) {
+        for (int i = 0;  i < numRes; ++i) {
             toInsert.clear();
             LinearSystems::restrictionItem * restrictionIt =  restriction[i].getRestriction();
             for (int j = 0;  j <= numVar; ++j) {
@@ -273,7 +273,7 @@ namespace Solver {
         // Print (Cj - Zj)
         output += printSizing("| Cj - Zj");
         for (int j = 0;  j < numVar; ++j) {
-            output += printSizing(" | "+tableArray[numRes+1][j].to_string());
+            output += printSizing(" | "+tableArray[numRes][j].to_string());
         }
         return output;
     }
@@ -315,20 +315,20 @@ namespace Solver {
             for (int i = 0; i < numRes; ++i) {
                 current = current + tableArray[i][j] * baseVariables[i].value.second;
             }
-            tableArray[numRes+1][j] = current - objectives[j].second;
+            tableArray[numRes][j] = current - objectives[j].second;
         }        
 
     }
 
     status Table::evaluateCjZj() {
         pivotColumn = 0;
-        Value::Number current = tableArray[numRes+1][0];
+        Value::Number current = tableArray[numRes][0];
         // Each column
         for (int j = 0; j < numVar; ++j) {
             // Keep track of highest column
-            if (current < tableArray[numRes+1][j]) {
+            if (current < tableArray[numRes][j]) {
                 
-                current = tableArray[numRes+1][j];
+                current = tableArray[numRes][j];
                 // Saves the pivot column for further calculations
                 pivotColumn = j;
             }   
@@ -375,6 +375,7 @@ namespace Solver {
             }
         }
 
+        std::cout << "Pivot Line: " << pivotLine+1 << std::endl;
         if (same>1) {
             return DEGENERATED;
         } else if (current < Value::Number(0,0)) {

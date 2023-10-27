@@ -90,6 +90,9 @@ namespace LinearSystems {
 
             Restriction();
 
+            // TODO - REMOVE - THIS IS FOR QUICK TESTING
+            Restriction(int i);
+
             Restriction(int variables, int restrictionNumber, objType type = NONE);
 
             ~Restriction();

@@ -92,7 +92,6 @@ namespace Solver {
 
             int addedX;
             int addedM;
-            int action;
             int numVar;
             int numRes;
             int pivotColumn;

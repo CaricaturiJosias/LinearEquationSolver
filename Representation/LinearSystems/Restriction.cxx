@@ -12,6 +12,7 @@
 #include "Restriction.hxx"
 #include <iostream>
 #include <algorithm>
+#include <utility>
 
 namespace LinearSystems {
 
@@ -33,6 +34,52 @@ namespace LinearSystems {
 
     Restriction::Restriction() {
 
+    }
+
+    Restriction::Restriction(int i) {
+        variableNumber = 2;
+        restrictionNumber = i;
+        restrictionInstance = static_cast<restrictionItem *>(malloc(sizeof(restrictionItem) * (variableNumber+2)));
+        std::vector<restrictionItem> objective = {
+            std::make_pair(variableType::VALUE, Value::Number(3)),
+            std::make_pair(variableType::VALUE, Value::Number(4)),
+            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::EQUAL)),
+            std::make_pair(variableType::VALUE, Value::Number(0))
+        };
+
+        std::vector<restrictionItem> restriction1 = {
+            std::make_pair(variableType::VALUE, Value::Number(2)),
+            std::make_pair(variableType::VALUE, Value::Number(3)),
+            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::HIGHER_EQUAL)),
+            std::make_pair(variableType::VALUE, Value::Number(8))
+        };
+
+        std::vector<restrictionItem> restriction2 = {
+            std::make_pair(variableType::VALUE, Value::Number(5)),
+            std::make_pair(variableType::VALUE, Value::Number(2)),
+            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::HIGHER_EQUAL)),
+            std::make_pair(variableType::VALUE, Value::Number(12))
+        };
+        
+        std::vector<restrictionItem> chosen;
+        if (i == 0) {
+            objectiveType = MIN;
+            chosen = objective;
+        } else if (i == 1) {
+            objectiveType = NONE;
+            chosen = restriction1;
+        } else {
+            objectiveType = NONE;
+            chosen = restriction2;
+        }
+
+        for (int j = 0; j < (variableNumber+2); ++j) {
+            restrictionInstance[j] = 
+                restrictionItem {
+                    static_cast<variableType>(chosen[j].first==variableType::SYMBOL),
+                    Value::Number(chosen[j].second)};
+        };
+        displayRestriction();
     }
 
     Restriction::Restriction(int variables, int restrictionNumber, objType type) :
@@ -85,19 +132,11 @@ namespace LinearSystems {
                 valueToStore = input;
             }
 
-
             restrictionInstance[i] = 
                 restrictionItem{
                     static_cast<variableType>(isInputSymbol),
                     Value::Number(valueToStore)};
         };
-        // if (type == MIN) {
-        //     for (int i = 0; i < (variableNumber+2); ++i) {
-        //         if (restrictionInstance[i].first != SYMBOL) {
-        //             restrictionInstance[i].second = restrictionInstance[i].second;
-        //         }
-        //     }
-        // }
         displayRestriction();
     }
 
@@ -343,16 +382,15 @@ namespace LinearSystems {
 
         int oldVariableNumber = variableNumber;
         variableNumber += symbolVec.size();
-
         restrictionItem * newObjetiveInstance = 
             static_cast<restrictionItem *>(
                 malloc(sizeof(restrictionItem) * (variableNumber+2)));
-
         bool isNotEqualSign = restrictionInstance[oldVariableNumber].second.getValue() != symbolEnum::EQUAL;
+
         /**
          * If the variable is below the oldVariable number, just copy
          * 
-         * If it is aboce the oldVariable number and is not == to the new variableNumber (symbol index)
+         * If it is above the oldVariable number and is not == to the new variableNumber (symbol index)
          * 
          * then insert symbolVec[i-oldVariableNumber] which is the 
          * artificial variable until the new symbol inedx
@@ -360,7 +398,6 @@ namespace LinearSystems {
         
         // Each restrictions can have in maximum 2 artificial
         for (int i = 0; i < (variableNumber+2); ++i) {
-
             if (i < oldVariableNumber) {
                 newObjetiveInstance[i] = restrictionInstance[i];
 

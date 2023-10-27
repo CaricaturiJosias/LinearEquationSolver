@@ -104,8 +104,6 @@ namespace Value {
         Number * result = new Number();
         // No scenarios where it divides by M too
         // But some Number instances might just be normal ints
-        std::cout  << "Dividing " << this->to_string() << std::endl
-                   << "By " << input.to_string() << std::endl;
         if (input.getValue() != 0) {
             result->setValue(value / input.getValue());
             result->setMValue(Mvalue / input.getValue());
@@ -113,8 +111,6 @@ namespace Value {
             result->setValue(value = INT_MAX);
             result->setMValue(Mvalue = INT_MAX);
         }
-        std::cout << "Real division " << value / input.getValue() << std::endl;
-        std::cout << "Result " << result->to_string() << std::endl;
         return *result;
     }
 
