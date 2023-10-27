@@ -259,6 +259,7 @@ namespace LinearSystems {
         for (int i = 0; i < (variableNumber+2); ++i) {
             
             bool isLastArtificial = i == (variableNumber-1);
+            bool isNextM = symbolVec[i-oldVariableNumber + 1].second.getMvalue();
 
             if (i < oldVariableNumber) {
                 newRestrictionInstance[i] = restrictionInstance[i];
@@ -282,6 +283,10 @@ namespace LinearSystems {
                     if (isMItem) {
                         // We want to save (0,1) so it doesnt comes out as (1 -1M)*xn but -1M*xn
                         symbolVec[i-oldVariableNumber].second.setValue(0);
+                    } else if (isNextM) {
+                        // A value right before the M is always negative, as the M value
+                        // exists to allow it to be >= 0
+                        symbolVec[i-oldVariableNumber].second.setValue(-1);
                     }
 
                     // If it contains an = already, we don't save any with 1
@@ -298,7 +303,6 @@ namespace LinearSystems {
                     // If its the last item skips this, avoid core dump and resets all items
                     if (!isLastArtificial) {
                         symbolVec[i-oldVariableNumber + 1].second.setValue(1);
-                        bool isNextM = symbolVec[i-oldVariableNumber + 1].second.getMvalue();
                         // Some restrictions might have more than one artificial variable allowed
                         // And the second is always an M item, there is NEVER an restriction with
                         // Just a M item
