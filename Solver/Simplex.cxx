@@ -74,7 +74,7 @@ namespace Solver {
                 continue;
             }
             tableInstance->calculateTheta();
-
+            std::cout << tableInstance->to_string() << std::endl;
             solutionStatus = DONE;
         }
     }

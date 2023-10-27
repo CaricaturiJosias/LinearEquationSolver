@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <string>
 #include <cmath>
+#include <iostream>
 
 namespace Value {
 
@@ -103,13 +104,17 @@ namespace Value {
         Number * result = new Number();
         // No scenarios where it divides by M too
         // But some Number instances might just be normal ints
+        std::cout  << "Dividing " << this->to_string() << std::endl
+                   << "By " << input.to_string() << std::endl;
         if (input.getValue() != 0) {
-            result->setValue(value /= input.getValue());
-            result->setMValue(Mvalue /= input.getValue());
+            result->setValue(value / input.getValue());
+            result->setMValue(Mvalue / input.getValue());
         } else {
             result->setValue(value = INT_MAX);
             result->setMValue(Mvalue = INT_MAX);
         }
+        std::cout << "Real division " << value / input.getValue() << std::endl;
+        std::cout << "Result " << result->to_string() << std::endl;
         return *result;
     }
 
@@ -252,7 +257,8 @@ namespace Value {
     }
 
     std::string Number::roundValue(double input) {
-        int precision = std::abs(input) < 1.0 ? 2 : 0;
+        bool noDecimals = input == static_cast<int>(input);
+        int precision = noDecimals ? 0 : 2;
         std::stringstream ss;
         ss << std::fixed << std::setprecision(precision) << input;
         // Return the formatted value as a string because

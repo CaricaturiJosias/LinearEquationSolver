@@ -204,6 +204,10 @@ namespace Solver {
             toInsert.clear();
             LinearSystems::restrictionItem * restrictionIt =  restriction[i].getRestriction();
             for (int j = 0;  j <= numVar; ++j) {
+                if (restrictionIt[j].first == LinearSystems::SYMBOL) {
+                    toInsert.push_back(restrictionIt[j+1].second);
+                    continue; // Avoid symbol
+                }
                 if (j == numVar) {
                     toInsert.push_back(restrictionIt[j].second);
                     // Add default theta value (0)
@@ -251,7 +255,7 @@ namespace Solver {
         output += "\n";
 
         for (int i = 0;  i < numRes; ++i) {
-            for (int j = 0;  j <= numVar+2; ++j) {
+            for (int j = 0;  j <= numVar+1; ++j) {
                 // Base variables that are not the first
                 if (j == 0) {
                     // Base variable: value itself (ie. 2 - 3*M) and them
@@ -259,10 +263,9 @@ namespace Solver {
                     // We would have for example: (2-3*M)*x8
                     output += printSizing("| " + baseVariables[i].value.second.to_string() +
                             "*x"  + std::to_string(baseVariables[i].index));
-                    continue;
                 } // if (j == 0)
                 // Include a Number into the output, we don't want M as it isn't supposed to appear here
-                output += printSizing(" | "+tableArray[i][j-1].to_string());
+                output += printSizing(" | "+tableArray[i][j].to_string());
             } // for (int j = 0;  j <= numVar+1; ++j)
             output += "\n";
         } // for (int i = 0;  i <= numRes; ++i)
@@ -348,20 +351,22 @@ namespace Solver {
         }
 
         pivotLine = 0;
-        Value::Number current = tableArray[numRes+1][0];
+        Value::Number current = tableArray[0][numVar+1];
         // Each column
         bool degenerated = false;
 
         // Checks which is higher
         for (int i = 0; i < numRes; ++i) {
             // Keep track of highest column
+            std::cout << "Current highest: " << current.to_string() << std::endl;
+            std::cout << "Challenger: " << tableArray[i][numVar+1].to_string() << std::endl;
             if (current < tableArray[i][numVar+1]) {
                 
                 current = tableArray[i][numVar+1];
                 // Saves the pivot column for further calculations
                 pivotLine = i;
             }   
-            if (current == tableArray[i][numVar+1]) {
+            if (current == tableArray[i][numVar+1] && i != 0) {
                 degenerated = true;
             } else {
                 degenerated = false;
