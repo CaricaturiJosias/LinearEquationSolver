@@ -42,6 +42,8 @@ namespace Solver {
             int iterations;
 
             Table * resolutionOrder;
+            
+            int selectedOption;
     };
 
 };

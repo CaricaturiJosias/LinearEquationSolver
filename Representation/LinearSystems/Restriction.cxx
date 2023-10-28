@@ -36,75 +36,6 @@ namespace LinearSystems {
 
     }
 
-    Restriction::Restriction(int i) {
-        variableNumber = 2;
-        restrictionNumber = i;
-        restrictionInstance = static_cast<restrictionItem *>(malloc(sizeof(restrictionItem) * (variableNumber+2)));
-        std::vector<restrictionItem> objective = {
-            std::make_pair(variableType::VALUE, Value::Number(4)),
-            std::make_pair(variableType::VALUE, Value::Number(3)),
-            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::EQUAL)),
-            std::make_pair(variableType::VALUE, Value::Number(0))
-        };
-
-        std::vector<restrictionItem> restriction1 = {
-            std::make_pair(variableType::VALUE, Value::Number(1)),
-            std::make_pair(variableType::VALUE, Value::Number(4)),
-            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::LOWER_EQUAL)),
-            std::make_pair(variableType::VALUE, Value::Number(3))
-        };
-
-        std::vector<restrictionItem> restriction2 = {
-            std::make_pair(variableType::VALUE, Value::Number(3)),
-            std::make_pair(variableType::VALUE, Value::Number(1)),
-            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::HIGHER_EQUAL)),
-            std::make_pair(variableType::VALUE, Value::Number(12))
-        };
-
-        std::vector<restrictionItem> restriction3 = {
-            std::make_pair(variableType::VALUE, Value::Number(1)),
-            std::make_pair(variableType::VALUE, Value::Number(0.67)),
-            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::LOWER_EQUAL)),
-            std::make_pair(variableType::VALUE, Value::Number(700))
-        };
-
-        std::vector<restrictionItem> restriction4 = {
-            std::make_pair(variableType::VALUE, Value::Number(0.1)),
-            std::make_pair(variableType::VALUE, Value::Number(0.25)),
-            std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::LOWER_EQUAL)),
-            std::make_pair(variableType::VALUE, Value::Number(135))
-        };
-        
-        std::vector<restrictionItem> chosen;
-        if (i == 0) {
-            objectiveType = MIN;
-            chosen = objective;
-        } else if (i == 1) {
-            objectiveType = NONE;
-            chosen = restriction1;
-        } 
-        // else if (i == 2) {
-        //     objectiveType = NONE;
-        //     chosen = restriction2;
-        // } else if (i == 3) {
-        //     objectiveType = NONE;
-        //     chosen = restriction3;
-        // } 
-        else {
-            objectiveType = NONE;
-            chosen = restriction2;
-        }
-
-        for (int j = 0; j < (variableNumber+2); ++j) {
-            restrictionInstance[j] = 
-                restrictionItem {
-                    static_cast<variableType>(chosen[j].first==variableType::SYMBOL),
-                    Value::Number(chosen[j].second)};
-        };
-
-        displayRestriction();
-    }
-
     Restriction::Restriction(int variables, int restrictionNumber, objType type) :
         restrictionNumber(restrictionNumber), objectiveType(type), variableNumber(variables) {
         /**
@@ -283,7 +214,7 @@ namespace LinearSystems {
     }
 
     void Restriction::displayRestriction() {
-        // system(CLEAR_COMMAND);
+        system(CLEAR_COMMAND);
         std::cout << to_string(restrictionNumber) << std::endl;
     }
 
@@ -395,7 +326,6 @@ namespace LinearSystems {
                 }
             }
         }
-        free(restrictionInstance);
 
         restrictionInstance = newRestrictionInstance;
     }
@@ -448,8 +378,6 @@ namespace LinearSystems {
                 }
             }
         }
-
-        free(restrictionInstance);
 
         restrictionInstance = newObjetiveInstance;
     }

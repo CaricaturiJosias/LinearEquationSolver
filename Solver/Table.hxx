@@ -78,6 +78,10 @@ namespace Solver {
 
             void executeIterationChange();
 
+            std::string getResults(bool isAlternated = false);
+
+            LinearSystems::System * getSystemToSolve() { return systemToSolve; }
+
         private:
 
             void reviewSystem();
@@ -104,6 +108,7 @@ namespace Solver {
             int numRes;
             int pivotColumn;
             int pivotLine;
+            int results;
 
             LinearSystems::objectiveType objective;
 

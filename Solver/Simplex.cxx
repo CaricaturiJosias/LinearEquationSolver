@@ -16,20 +16,29 @@
 
 namespace Solver {
 
+    std::map<status, std::string> statusToString {
+        {WORK, std::string("WORK")},
+        {DONE, std::string("DONE")},
+        {NO_FRONTIER, std::string("NO_FRONTIER")},
+        {NON_VIABLE, std::string("NON_VIABLE")},
+        {DEGENERATED, std::string("DEGENERATED")},
+        {ALTERNATED_OPTIMAL, std::string("ALTERNATED_OPTIMAL")},
+        {CYCLIC, std::string("CYCLIC")}
+    };
+
     Simplex::Simplex() {
 
         resolutionOrder = static_cast<Table*>(malloc(sizeof(Table) * 100));
         std::string input;
         bool inputNotValid = true;
-        int selectedOption = 0;
+        selectedOption = 0;
 
         while (inputNotValid) {
-            // std::cout   << "Welcome, please select an option for the resolution" << std::endl
-            //             << "1) Show me just the results" << std::endl
-            //             << "2) Show me step by step quickly" << std::endl
-            //             << "3) Show me each step and wait for input before continuing" << std::endl;
-            // std::cin >> input;
-            input = "2";
+            std::cout   << "Welcome, please select an option for the resolution" << std::endl
+                        << "1) Show me just the results" << std::endl
+                        << "2) Show me step by step quickly" << std::endl
+                        << "3) Show me each step and wait for input before continuing" << std::endl;
+            std::cin >> input;
             Helper::isAllDigits(input, selectedOption);
             if (selectedOption >= 1 && selectedOption <= 3) {
                 inputNotValid = false;
@@ -66,21 +75,28 @@ namespace Solver {
         status solutionStatus = status::WORK;
         iterations = 0;
         std::string a;
+        std::string outputString;
         while (solutionStatus != DONE) {
-            std::cout << "Input: ";
-            std::cin >> a;
-            std::cout << "calculateCjZj" << std::endl;
+
+            if (selectedOption == 3) {
+                std::cout << "Input: ";
+                std::cin >> a;
+            }
+            // std::cout << "calculateCjZj" << std::endl;
+
             tableInstance->calculateCjZj();
-            std::cout << "evaluateCjZj" << std::endl;
+            // std::cout << "evaluateCjZj" << std::endl;
             solutionStatus = tableInstance->evaluateCjZj();
             if (solutionStatus == ALTERNATED_OPTIMAL) {
-                break;
+                std::cout << tableInstance->getResults(true) << std::endl;
             } 
-            if (solutionStatus == DONE) {
-                std::cout << "DONE" << std::endl;
+
+            // std::cout << "calculateTheta" << std::endl;
+            // If user wants every iteration, give him that
+            if (selectedOption == 2 || selectedOption == 3) {
+                std::cout << tableInstance->getSystemToSolve()->to_string() << std::endl;
+                std::cout << tableInstance->to_string() << std::endl;
             }
-            std::cout << "calculateTheta" << std::endl;
-            std::cout << tableInstance->to_string() << std::endl;
             if (solutionStatus != DONE) {
                 solutionStatus = tableInstance->calculateTheta();
             } else {
@@ -97,15 +113,21 @@ namespace Solver {
             // IF DONE WE CANNOT ALTER AGAIN
 
             // std::cout << tableInstance->to_string() << std::endl;
-            std::cout << "updateBaseVariables" << std::endl;
+            // std::cout << "updateBaseVariables" << std::endl;
             tableInstance->updateBaseVariables();
-            std::cout << tableInstance->to_string() << std::endl;
-            std::cout << "Status = " << solutionStatus << std::endl;
-            std::cout << "executeIterationChange" << std::endl;
+            // std::cout << tableInstance->to_string() << std::endl;
+            // std::cout << "Status = " << solutionStatus << std::endl;
+            // std::cout << "executeIterationChange" << std::endl;
             tableInstance->executeIterationChange();
         }
-        std::cout << "Status = " << solutionStatus << std::endl;
+        // std::cout << "Status = " << solutionStatus << std::endl;
+        std::cout << std::endl  << "Finished! The final status is " 
+                                << statusToString[solutionStatus] << std::endl << std::endl;
         std::cout << tableInstance->to_string() << std::endl;
+
+        std::cout << tableInstance->getResults() << std::endl;
+
+        delete tableInstance;
     }
 
 }; 

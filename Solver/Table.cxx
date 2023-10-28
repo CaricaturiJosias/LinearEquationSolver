@@ -20,6 +20,7 @@
 namespace Solver {
 
     Table::Table(LinearSystems::System * toSolveSystem) : systemToSolve(toSolveSystem) {
+        results = 0;
         objective  = systemToSolve->getAction();
 
         // Same number as number of restrictions
@@ -39,6 +40,7 @@ namespace Solver {
     }
 
     Table::~Table() {
+        // free(baseVariables);
     }
 
     void Table::reviewSystem() {
@@ -210,7 +212,7 @@ namespace Solver {
                 if (!isBaseVariable(j)) { // Not base, don't care
                     continue;
                 } else if (tableArray[i][j] == 0) {
-                    continue; // Ignore, base variable shouldnt be on the line of zeros
+                    continue; // Ignore, base variable shouldnt be on the line with zero to itself
                 } else if (tableArray[i][j] == 1 && !isAlreadyInList(j, tempBaseVariables)) {
                     candidate = j+1; // Lets have this as a candidate
                 }
@@ -239,6 +241,7 @@ namespace Solver {
         LinearSystems::Restriction * restriction = systemToSolve->getRestrictions();
         
         std::vector<Value::Number> toInsert;
+        toInsert.reserve(numRes+2);
 
         // Build the restriction lines
         for (int i = 0;  i < numRes; ++i) {
@@ -389,7 +392,7 @@ namespace Solver {
             for (int i = 0; i < numRes; ++i) {
                 current += tableArray[i][j] * baseVariables[i].value.second;
             }
-            std::cout << "Current: " << current.to_string() << std::endl;
+            // std::cout << "Current: " << current.to_string() << std::endl;
             tableArray[numRes][j] = objectives[j].second - current;
         }     
         current = Value::Number(0,0);   
@@ -429,7 +432,7 @@ namespace Solver {
         // std::cout << "Current: " << current.to_string() << std::endl;
         // std::cout << "zero: " << zero.to_string() << std::endl;
         if (current < zero) {
-            std::cout << "done" << std::endl;
+            // std::cout << "done" << std::endl;
             return DONE;
         } else if (current == zero) {
             std::cout << "alternado" << std::endl;
@@ -534,6 +537,32 @@ namespace Solver {
         // Discover which is the value to divide all by
 
 
+    }
+
+    std::string Table::getResults(bool isAlternated) {
+        // Get all variable values available
+        std::string output;
+        if (isAlternated) {
+            ++results;
+            output = "Alternated solution found, solution number "+ results + std::string("\n");
+        } else if (results != 0) {
+            output = "Final alternated solution found, total number of solutions: "
+                     + results + std::string("\n");
+        } else {
+            output = "Optimal solution found\n";
+        }
+        if (systemToSolve->getAction() == LinearSystems::MIN) {
+            output += "C: " + (tableArray[numRes][numVar]*-1).to_string();
+        }
+        output += "\n";
+
+        for (int i = 0; i < numRes; ++i) {
+            output += "x"+std::to_string(baseVariables[i].index);
+            output += " = " + tableArray[i][numVar].to_string();
+            output += "\n";
+        }
+        output += "\n";
+        return output;
     }
 
 };
