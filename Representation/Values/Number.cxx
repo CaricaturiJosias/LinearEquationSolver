@@ -64,7 +64,11 @@ namespace Value {
 
     Number& Number::operator+(Number input) {
         Number * result = new Number(0);
-        result->setValue(value + input.getValue());
+        if (input.getValue() == INT_MAX) {
+            result->setValue(INT_MAX);
+        } else {
+            result->setValue(value + input.getValue());
+        }
         result->setMValue(Mvalue + input.getMvalue());
         return *result;
     }
@@ -77,6 +81,11 @@ namespace Value {
 
     Number& Number::operator-(Number input) {
         Number * result = new Number(0);
+        if (input.getValue() == INT_MAX) {
+            result->setValue(-INT_MAX);
+        } else {
+            result->setValue(value + input.getValue());
+        }
         result->setValue(value - input.getValue());
         result->setMValue(Mvalue - input.getMvalue());
         return *result;
@@ -110,20 +119,20 @@ namespace Value {
         if (input.getValue() != 0) {
             result->setValue(value / input.getValue());
         } else {
-            result->setValue(value = 0);
+            result->setValue(value = INT_MAX);
         }
         return *result;
     }
 
     Number& Number::operator/(double input) {
+        Number * result = new Number(0);
         if (input != 0) {
-            value /= input;
-            Mvalue /= input;
+            result->setValue(value / input);
+            result->setMValue(Mvalue / input);
         } else {
-            value = INT_MAX;
-            Mvalue = INT_MAX;
+            result->setValue(INT_MAX);
         }
-        return *this;
+        return *result;
     }
 
     Number& Number::operator+=(Number input) {
@@ -236,6 +245,12 @@ namespace Value {
     }
 
     std::string Number::to_string() {
+        if (value == INT_MAX) {
+            return "∞";
+        } else if (value == INT_MAX) {
+            return "-∞";
+        }
+
         if (Mvalue == 0 && value == 0) {
             return "0";
         } else if (Mvalue == 0) {

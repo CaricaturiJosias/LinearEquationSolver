@@ -378,7 +378,6 @@ namespace Solver {
 
     bool Table::hasSlackVariable() {
         for (int i = 0; i < numRes; ++i) {
-            std::cout << baseVariables[i].value.first << std::endl;
             if (baseVariables[i].value.first == LinearSystems::SLACK_VARIABLE) {
                 return true;
             }
@@ -441,9 +440,6 @@ namespace Solver {
         // std::cout << "Current: " << current.to_string() << std::endl;
         // std::cout << "zero: " << zero.to_string() << std::endl;
         bool hasSlack = hasSlackVariable();
-        if (hasSlack) {
-            std::cout << "HAS SLACK" << std::endl;
-        }
         bool isDone = (current < zero) || (current == zero);
         if (isDone && hasSlack) {
             return NON_VIABLE;
@@ -466,17 +462,24 @@ namespace Solver {
 
         pivotLine = 0;
         Value::Number current = tableArray[0][numVar+1];
+        Value::Number higher = tableArray[0][numVar+1];
         // Each column
 
         // Checks which is lower
         for (int i = 0; i < numRes; ++i) {
             // Keep track of lower column
+
             if (current > tableArray[i][numVar+1]) {
-                
                 current = tableArray[i][numVar+1];
                 // Saves the pivot column for further calculations
                 pivotLine = i;
-            } 
+            }
+
+            if (!(higher > tableArray[i][numVar+1] || higher == tableArray[i][numVar+1])) {
+                // Keep track of no frontier systems
+                higher = tableArray[i][numVar+1];
+            }
+
         }
         int same = 0;
         for (int i = 0; i < numRes; ++i) {
@@ -485,12 +488,12 @@ namespace Solver {
             }
         }
 
-        // std::cout << "Pivot Line: " << pivotLine+1 << std::endl;
-        // std::cout << "Pivot Element: " << current.to_string() << std::endl;
-        // std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
+        std::cout << "Pivot Line: " << pivotLine+1 << std::endl;
+        std::cout << "Pivot Element: " << current.to_string() << std::endl;
+        std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
         if (same>1) {
             return DEGENERATED;
-        } else if (current <= Value::Number(0,0) || current == Value::Number(0,0)) {
+        } else if (higher <= Value::Number(0,0) || higher == Value::Number(0,0)) {
             return NO_FRONTIER;
         }
 

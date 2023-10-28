@@ -92,7 +92,10 @@ namespace Solver {
             solutionStatus = tableInstance->evaluateCjZj();
             if (solutionStatus == ALTERNATED_OPTIMAL) {
                 std::cout << tableInstance->getResults(true) << std::endl;
-            } 
+            }  else if (solutionStatus == NON_VIABLE) {
+                std::cout << "The code has a non viable solution, ending the program..." << std::endl;
+                break;
+            }
 
             // std::cout << "calculateTheta" << std::endl;
             // If user wants every iteration, give him that
