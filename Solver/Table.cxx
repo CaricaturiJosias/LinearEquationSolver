@@ -322,7 +322,7 @@ namespace Solver {
     }
 
     std::string Table::printSizing(std::string toSizeInput) {
-        std::string base = "               ";
+        std::string base = "                ";
         std::string output;
         // Fits the bill
         if (base.size() == toSizeInput.size()) {
@@ -488,9 +488,9 @@ namespace Solver {
             }
         }
 
-        std::cout << "Pivot Line: " << pivotLine+1 << std::endl;
-        std::cout << "Pivot Element: " << current.to_string() << std::endl;
-        std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
+        // std::cout << "Pivot Line: " << pivotLine+1 << std::endl;
+        // std::cout << "Pivot Element: " << current.to_string() << std::endl;
+        // std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
         if (same>1) {
             return DEGENERATED;
         } else if (higher <= Value::Number(0,0) || higher == Value::Number(0,0)) {

@@ -59,6 +59,21 @@ namespace LinearSystems {
         std::string message;
         // Run variables + 1, the +1 is for the symbol and the value on the right
         for (int i = 0; i < (variableNumber+2); ++i) {
+            if (type != NONE && (i >= variableNumber)) {
+                // Objetive asks nothing about symbol and right side value
+                if (i == variableNumber) {
+                    restrictionInstance[i] = 
+                    restrictionItem{
+                        static_cast<variableType>(SYMBOL),
+                        Value::Number(EQUAL)};
+                } else if (i > variableNumber) {
+                    restrictionInstance[i] = 
+                    restrictionItem{
+                        static_cast<variableType>(VALUE),
+                        Value::Number(0)};
+                }
+                continue;
+            }
             input = askForInput(hasSymbol, message);
             bool isInputSymbol = isSymbol(input);
 
@@ -182,6 +197,9 @@ namespace LinearSystems {
 
         std::string symbol;
         for (int i = 0; i < (variableNumber+2); ++i) {
+            if (objectiveType != NONE && i >= variableNumber) {
+                    continue;
+            }
             if (i == variableNumber) { // Its a symbol
                 symbol = symbolMap[static_cast<int>(restrictionInstance[i].second.getValue())];
                 if (symbol.empty()) {

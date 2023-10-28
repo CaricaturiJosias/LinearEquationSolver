@@ -78,6 +78,7 @@ namespace Solver {
         iterations = 0;
         std::string a;
         std::string outputString;
+        system(CLEAR_COMMAND);
         std::cout << tableInstance->getSystemToSolve()->to_string() << std::endl;
         while (solutionStatus != DONE) {
 
@@ -100,7 +101,6 @@ namespace Solver {
             // std::cout << "calculateTheta" << std::endl;
             // If user wants every iteration, give him that
             if (selectedOption == 2 || selectedOption == 3) {
-                std::cout << tableInstance->getSystemToSolve()->to_string() << std::endl;
                 std::cout << tableInstance->to_string() << std::endl;
             }
 
