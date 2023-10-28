@@ -51,7 +51,7 @@ namespace Solver {
         NON_VIABLE,             // Sistema Inviável
         DEGENERATED,            // Degeneração
         ALTERNATED_OPTIMAL,     // Ótimos alternados
-        CYCLIC,                 // when the resolution goes into loop
+        CYCLIC,                 // When the resolution goes into loop
     };
 
     class Table {
