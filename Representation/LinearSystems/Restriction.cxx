@@ -227,10 +227,10 @@ namespace LinearSystems {
          * I have a given restriction
          * Rn = 1*x1 -4*x2 + 7*x3 <= 10
          * 
-         * And i have new artificial variables x4, x5, x6, i want to insert them
+         * And I have new slack variables x4, x5, x6, i want to insert them
          */
 
-        // variableNumber + 1 is for the system without the artificial variables
+        // variableNumber + 1 is for the system without the slack variables
 
         int oldVariableNumber = variableNumber;
         variableNumber += symbolVec.size();
@@ -246,10 +246,10 @@ namespace LinearSystems {
          * If it is above the oldVariable number and is not == to the new variableNumber (symbol index)
          * 
          * then insert symbolVec[i-oldVariableNumber] which is the 
-         * artificial variable until the new symbol index
+         * slack variable until the new symbol index
          */
         
-        // Each restrictions can have in maximum 2 artificial
+        // Each restrictions can have in maximum 2 slack (variables)
         bool changeDone = false;
 
         for (int i = 0; i < (variableNumber+2); ++i) {
@@ -262,7 +262,7 @@ namespace LinearSystems {
 
             } else if (i < variableNumber) {
 
-                // Is the first restriction of the system and iterator is on the first artificial
+                // Is the first restriction of the system and iterator is on the first slack
                 if (((i-oldVariableNumber) == 0) && isFirst) {
                     symbolVec[i-oldVariableNumber].second.setValue(1);
                 }

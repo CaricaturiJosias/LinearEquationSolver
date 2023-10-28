@@ -522,7 +522,7 @@ namespace Solver {
 
     void Table::executeIterationChange() {
         /**
-         * WE DON'T THE ENTIRE GAUSS JORDAN, YAY
+         * WE DON'T NEED THE ENTIRE GAUSS JORDAN, YAY
          * 
          * We need however, to 0 out the column of the new base variable on all the other ones
         */
@@ -575,6 +575,7 @@ namespace Solver {
 
         output += "\n";
 
+        // Get the result obtained in the variables
         for (int i = 0; i < numRes; ++i) {
             output += "x"+std::to_string(baseVariables[i].index);
             output += " = " + tableArray[i][numVar].to_string();
