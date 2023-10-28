@@ -47,11 +47,11 @@ namespace Solver {
     enum status {
         WORK,
         DONE,
-        NO_FRONTIER,
-        NON_VIABLE,
-        DEGENERATED,
-        ALTERNATED_OPTIMAL,
-        CYCLIC,
+        NO_FRONTIER,            // Sem Frontreira
+        NON_VIABLE,             // Sistema Inviável
+        DEGENERATED,            // Degeneração
+        ALTERNATED_OPTIMAL,     // Ótimos alternados
+        CYCLIC,                 // when the resolution goes into loop
     };
 
     class Table {
