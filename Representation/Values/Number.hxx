@@ -70,6 +70,9 @@ namespace Value {
             bool operator<=(Number input);
             bool operator<=(double input);
 
+            bool operator!=(Number input);
+            bool operator!=(double input);
+
             std::string to_string();
 
             std::string to_string_no_m();

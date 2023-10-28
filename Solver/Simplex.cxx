@@ -75,6 +75,7 @@ namespace Solver {
         */
 
         status solutionStatus = status::WORK;
+        bool isPreviousNoFrontier = false;
         iterations = 0;
         std::string a;
         std::string outputString;
@@ -98,23 +99,30 @@ namespace Solver {
                 break;
             }
 
+            if (solutionStatus != DONE) {
+                solutionStatus = tableInstance->calculateTheta();
+            } else {
+                tableInstance->calculateTheta();
+            }
+            
             // std::cout << "calculateTheta" << std::endl;
             // If user wants every iteration, give him that
             if (selectedOption == 2 || selectedOption == 3) {
                 std::cout << tableInstance->to_string() << std::endl;
             }
 
-            if (solutionStatus != DONE) {
-                solutionStatus = tableInstance->calculateTheta();
-            } else {
-                tableInstance->calculateTheta();
+            if (isPreviousNoFrontier) {
+                break;
             }
+
             if (solutionStatus == DONE) {
                 continue;
+            } else if (solutionStatus == DEGENERATED) {
+                std::cout << "Degenerated system detected, stopping..." << std::endl;
+                break;
             }  else if (solutionStatus == NO_FRONTIER) {
                 std::cout << "No frontier system detected, no solution available here" << std::endl;
-                std::cout << tableInstance->to_string() << std::endl;
-                break; // Avoid last print
+                isPreviousNoFrontier = true;
             }
             // Save current table before next iteration
             Table toSave = *tableInstance;

@@ -483,7 +483,7 @@ namespace Solver {
         }
         int same = 0;
         for (int i = 0; i < numRes; ++i) {
-            if (current == tableArray[i][numVar+1] && i != 0) {
+            if (current == tableArray[i][numVar+1]) {
                 ++same;
             }
         }
@@ -493,7 +493,7 @@ namespace Solver {
         // std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
         if (same>1) {
             return DEGENERATED;
-        } else if (higher <= Value::Number(0,0) || higher == Value::Number(0,0)) {
+        } else if (higher < Value::Number(0,0) || higher == Value::Number(0,0) || higher != INT_MAX) {
             return NO_FRONTIER;
         }
 

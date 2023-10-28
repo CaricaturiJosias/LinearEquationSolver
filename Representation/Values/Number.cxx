@@ -118,6 +118,7 @@ namespace Value {
         // But some Number instances might just be normal ints
         if (input.getValue() != 0) {
             result->setValue(value / input.getValue());
+            result->setMValue(Mvalue / input.getValue());
         } else {
             result->setValue(value = INT_MAX);
         }
@@ -242,6 +243,14 @@ namespace Value {
 
     bool Number::operator<=(double input) {
         return (value <= input);
+    }
+
+    bool Number::operator!=(Number input) {
+        return value != input.getValue();
+    }
+
+    bool Number::operator!=(double input) {
+        return value != input;
     }
 
     std::string Number::to_string() {
