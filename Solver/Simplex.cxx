@@ -17,6 +17,7 @@
 namespace Solver {
 
     std::map<status, std::string> statusToString {
+        // Simplex status
         {WORK, std::string("WORK")},
         {DONE, std::string("DONE")},
         {NO_FRONTIER, std::string("NO_FRONTIER")},
