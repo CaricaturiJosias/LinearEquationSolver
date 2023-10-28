@@ -65,7 +65,10 @@ namespace Solver {
 
         status solutionStatus = status::WORK;
         iterations = 0;
+        std::string a;
         while (solutionStatus != DONE) {
+            std::cout << "Input: ";
+            std::cin >> a;
             std::cout << "calculateCjZj" << std::endl;
             tableInstance->calculateCjZj();
             std::cout << "evaluateCjZj" << std::endl;
@@ -73,27 +76,36 @@ namespace Solver {
             if (solutionStatus == ALTERNATED_OPTIMAL) {
                 break;
             } 
+            if (solutionStatus == DONE) {
+                std::cout << "DONE" << std::endl;
+            }
             std::cout << "calculateTheta" << std::endl;
             std::cout << tableInstance->to_string() << std::endl;
-            solutionStatus = tableInstance->calculateTheta();
-            if (solutionStatus == ALTERNATED_OPTIMAL) {
-                break;
+            if (solutionStatus != DONE) {
+                solutionStatus = tableInstance->calculateTheta();
+            } else {
+                tableInstance->calculateTheta();
+            }
+            if (solutionStatus == DONE) {
+                continue;
             } 
             // Save current table before next iteration
             Table toSave = *tableInstance;
             resolutionOrder[iterations] = toSave;
             ++iterations;
-            std::cout << tableInstance->to_string() << std::endl;
+
+            // IF DONE WE CANNOT ALTER AGAIN
+
+            // std::cout << tableInstance->to_string() << std::endl;
             std::cout << "updateBaseVariables" << std::endl;
             tableInstance->updateBaseVariables();
             std::cout << tableInstance->to_string() << std::endl;
+            std::cout << "Status = " << solutionStatus << std::endl;
             std::cout << "executeIterationChange" << std::endl;
             tableInstance->executeIterationChange();
-            std::cout << tableInstance->to_string() << std::endl;
-            std::cout << "Status = " << solutionStatus << std::endl;
         }
         std::cout << "Status = " << solutionStatus << std::endl;
         std::cout << tableInstance->to_string() << std::endl;
     }
 
-};
+}; 

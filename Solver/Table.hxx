@@ -98,8 +98,6 @@ namespace Solver {
 
             LinearSystems::System * systemToSolve;
 
-            int addedX;
-            int addedM;
             int numVar;
             int numRes;
             int pivotColumn;

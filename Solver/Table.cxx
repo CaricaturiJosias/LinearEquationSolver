@@ -19,8 +19,7 @@
 
 namespace Solver {
 
-    Table::Table(LinearSystems::System * toSolveSystem) : systemToSolve(toSolveSystem),
-                                                            addedM(0), addedX(0) {
+    Table::Table(LinearSystems::System * toSolveSystem) : systemToSolve(toSolveSystem) {
         objective  = systemToSolve->getAction();
 
         // Same number as number of restrictions
@@ -103,14 +102,12 @@ namespace Solver {
         LinearSystems::restrictionItem * restrictionData = restriction->getRestriction();
 
         // We want to have only
-        ++addedX; // We always need to add an X variable, not always an M variable
         Value::Number valueX(0, 0);
         result.push_back(LinearSystems::restrictionItem(
                 LinearSystems::variableType::ARTIFICIAL_VARIABLE, valueX));
 
         bool addM = restrictionSymbol == LinearSystems::symbolMap[LinearSystems::symbolEnum::HIGHER_EQUAL];
         if (addM) {
-            ++addedM;
             Value::Number valueM(0, 1);
             result.push_back(LinearSystems::restrictionItem(
                     LinearSystems::variableType::ARTIFICIAL_VARIABLE, valueM));
@@ -157,7 +154,7 @@ namespace Solver {
 
                 isNaturalVariable = objectiveItem[j].first == LinearSystems::VALUE;
                 lookForSlack = (!lookForM) && !isNaturalVariable;
-                lookForNonSlack = ((!lookForM) && isNaturalVariable) && isNaturalVariable;
+                lookForNonSlack = ((!lookForM) && isNaturalVariable) && repetition > 1;
 
                 // If we already looked for M (M) AND its (not) a non-slack (N)
                 // OR
@@ -344,26 +341,30 @@ namespace Solver {
          * Get each column, 
          * multiply the values with the base on each line
          */
-
         LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
 
+        Value::Number current;
         // Each column
         for (int j = 0; j < numVar; ++j) {
             // Each value
-            Value::Number current;
+            current = Value::Number(0,0);
             for (int i = 0; i < numRes; ++i) {
                 current += tableArray[i][j] * baseVariables[i].value.second;
             }
+            std::cout << "Current: " << current.to_string() << std::endl;
             tableArray[numRes][j] = objectives[j].second - current;
-        }        
-
+        }     
+        current = Value::Number(0,0);   
+        for (int i = 0; i < numRes; ++i) {
+            current += tableArray[i][numVar] * baseVariables[i].value.second;
+        }
+        tableArray[numRes][numVar] = current;
     }
 
     status Table::evaluateCjZj() {
         pivotColumn = 0;
         Value::Number current = getFirstNonBase();
         pivotColumn = getFirstNonColumn();
-        Value::Number total = Value::Number(0);
 
         // Each column
         for (int j = 0; j < numVar; ++j) {
@@ -376,7 +377,6 @@ namespace Solver {
             }
             // std::cout   << "Did not skip j: " << j << std::endl 
             //             << "With value: " << tableArray[numRes][j].to_string() << std::endl;
-            total += tableArray[numRes][j];
             if (tableArray[numRes][j] > current) {
                 
                 current = tableArray[numRes][j];
@@ -387,15 +387,14 @@ namespace Solver {
             // std::cout << "Printing current " << current.to_string() << std::endl;
         }
         // std::cout << "Pivot column: " << pivotColumn+1 << std::endl;
-        tableArray[numRes][numVar] = total;
         Value::Number zero = Value::Number(0,0);
         // std::cout << "Current: " << current.to_string() << std::endl;
         // std::cout << "zero: " << zero.to_string() << std::endl;
         if (current < zero) {
-            // std::cout << "done" << std::endl;
+            std::cout << "done" << std::endl;
             return DONE;
         } else if (current == zero) {
-            // std::cout << "alternado" << std::endl;
+            std::cout << "alternado" << std::endl;
             return ALTERNATED_OPTIMAL;
         }
         return WORK;

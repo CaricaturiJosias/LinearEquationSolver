@@ -65,6 +65,8 @@ namespace LinearSystems {
 
         restrictions[0] = Restriction(1);
         restrictions[1] = Restriction(2);
+        // restrictions[2] = Restriction(3);
+        // restrictions[3] = Restriction(4);
         objectiveAction = MIN;
         return;
         ////////////////////////////////////////////////
