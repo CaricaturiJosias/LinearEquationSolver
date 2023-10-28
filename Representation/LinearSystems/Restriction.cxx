@@ -41,24 +41,24 @@ namespace LinearSystems {
         restrictionNumber = i;
         restrictionInstance = static_cast<restrictionItem *>(malloc(sizeof(restrictionItem) * (variableNumber+2)));
         std::vector<restrictionItem> objective = {
-            std::make_pair(variableType::VALUE, Value::Number(-0.1)),
-            std::make_pair(variableType::VALUE, Value::Number(-0.07)),
+            std::make_pair(variableType::VALUE, Value::Number(4)),
+            std::make_pair(variableType::VALUE, Value::Number(3)),
             std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::EQUAL)),
             std::make_pair(variableType::VALUE, Value::Number(0))
         };
 
         std::vector<restrictionItem> restriction1 = {
             std::make_pair(variableType::VALUE, Value::Number(1)),
-            std::make_pair(variableType::VALUE, Value::Number(0)),
+            std::make_pair(variableType::VALUE, Value::Number(4)),
             std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::LOWER_EQUAL)),
-            std::make_pair(variableType::VALUE, Value::Number(6000))
+            std::make_pair(variableType::VALUE, Value::Number(3))
         };
 
         std::vector<restrictionItem> restriction2 = {
-            std::make_pair(variableType::VALUE, Value::Number(0)),
+            std::make_pair(variableType::VALUE, Value::Number(3)),
             std::make_pair(variableType::VALUE, Value::Number(1)),
             std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::HIGHER_EQUAL)),
-            std::make_pair(variableType::VALUE, Value::Number(2000))
+            std::make_pair(variableType::VALUE, Value::Number(12))
         };
 
         std::vector<restrictionItem> restriction3 = {

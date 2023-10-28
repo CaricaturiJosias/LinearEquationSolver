@@ -31,12 +31,11 @@ namespace Solver {
         // insert them and adjust the restrictions
         reviewSystem();
 
+        defineTable();
+
         // Checks for artificial variables,
         // insert them and adjust the restrictions
         decideBaseVariables();
-
-        defineTable();
-        std::cout << "CABO" << std::endl;
     }
 
     Table::~Table() {
@@ -118,11 +117,9 @@ namespace Solver {
 
     void Table::decideBaseVariables() {
         LinearSystems::restrictionItem *  objectiveItem = systemToSolve->getObjective()->getRestriction();
-
-        int numVariables = systemToSolve->getNumberOfVariables();
-        int numRestrictions = systemToSolve->getNumberOfRestrictions();
+        numRes = systemToSolve->getNumberOfRestrictions();
+        numVar = systemToSolve->getNumberOfVariables();
         int repetition = 0;
-
         bool lookForM = true;
 
         std::set<int> insertedBase;
@@ -130,14 +127,18 @@ namespace Solver {
          * All base variables must be set, the order to prioritize is:
          * 1 - M values
          * 2 - values without M
+         * 
+         * We must make sure that the base variable match the line where it is 1
+         * with it's column
          */
+
         bool alreadyIn, hasMvalue, isNaturalVariable, lookForSlack, lookForNonSlack;
 
-        for (int i = 0; i < numRestrictions; ++i) {
+        for (int i = 0; i < numRes; ++i) {
             /**
              * Look for each M value or values without M on the next
              */
-            for (int j = 0; j < numVariables; ++j) {
+            for (int j = 0; j < numVar; ++j) {
                 // If we are looking for M values (first loop)
                 alreadyIn  = insertedBase.find(j) != insertedBase.end();
                 hasMvalue = objectiveItem[j].second.getMvalue();
@@ -164,7 +165,7 @@ namespace Solver {
                 if (lookForSlack || lookForNonSlack) {
 
                     // Last item? we cannot reach this if its a M value in the end
-                    if (j == (numVariables-1)) {
+                    if (j == (numVar-1)) {
                         insertedBase.insert(j);
                         baseVariables[i].value.second = objectiveItem[j].second;
                         baseVariables[i].index = j+1;
@@ -183,7 +184,7 @@ namespace Solver {
                     break;
                 }
 
-            } // for (int j = numVariables-1;
+            } // for (int j = numVar-1;
             // The number of base variables must match the number of the current restriction + 1
             if (insertedBase.size() != (i+1)) {
                 --i;
@@ -193,6 +194,34 @@ namespace Solver {
             }
             repetition = 0;
         }
+
+        /**
+         * We must organize the variables in a proper order
+         * according to the values in their columns
+        */
+       // Same number as number of restrictions
+        baseVariableItem * tempBaseVariables = static_cast<baseVariableItem *>(
+                            malloc(sizeof(baseVariableItem)
+                                    *systemToSolve->getNumberOfRestrictions()));
+
+        int candidate = 0;
+        for (int i = 0; i < numRes; ++i) {
+            for (int j = 0; j < numVar; ++j) {
+                if (!isBaseVariable(j)) { // Not base, don't care
+                    continue;
+                } else if (tableArray[i][j] == 0) {
+                    continue; // Ignore, base variable shouldnt be on the line of zeros
+                } else if (tableArray[i][j] == 1 && !isAlreadyInList(j, tempBaseVariables)) {
+                    candidate = j+1; // Lets have this as a candidate
+                }
+            }
+            tempBaseVariables[i].index = candidate; 
+            tempBaseVariables[i].value = 
+                std::make_pair(LinearSystems::VALUE, objectiveItem[candidate-1].second);
+        }
+
+        free(baseVariables);
+        baseVariables = tempBaseVariables;
     }
 
     void Table::defineTable() {
@@ -334,6 +363,15 @@ namespace Solver {
             }  
         }
         return 0;
+    }
+
+    bool Table::isAlreadyInList(int index, baseVariableItem * givenList) {
+        for (int i = 0; i < numRes; ++i) {
+            if (givenList[i].index == (index+1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void Table::calculateCjZj() {

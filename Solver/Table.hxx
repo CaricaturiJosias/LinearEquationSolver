@@ -96,6 +96,8 @@ namespace Solver {
 
             int getFirstNonColumn();
 
+            bool isAlreadyInList(int index, baseVariableItem * givenList);
+
             LinearSystems::System * systemToSolve;
 
             int numVar;
