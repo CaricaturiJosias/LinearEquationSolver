@@ -35,11 +35,11 @@ namespace Solver {
         selectedOption = 0;
 
         while (inputNotValid) {
-            std::cout   << "Welcome, please select an option for the resolution:" << std::endl
+            std::cout   << "Welcome, please choose an option for the resolution:" << std::endl
                         << "1) Show me just the results" << std::endl
                         << "2) Show me step by step quickly" << std::endl
                         << "3) Show me each step and wait for input before continuing" << std::endl
-                        << "\nChoose one option: " << std::endl;
+                        << "\nChoose an option: " << std::endl;
             std::cin >> input;
             Helper::isAllDigits(input, selectedOption);
             if (selectedOption >= 1 && selectedOption <= 3) {
