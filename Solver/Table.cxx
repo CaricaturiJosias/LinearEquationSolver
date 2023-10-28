@@ -322,7 +322,7 @@ namespace Solver {
     }
 
     std::string Table::printSizing(std::string toSizeInput) {
-        std::string base = "              ";
+        std::string base = "               ";
         std::string output;
         // Fits the bill
         if (base.size() == toSizeInput.size()) {
