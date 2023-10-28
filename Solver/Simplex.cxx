@@ -65,22 +65,35 @@ namespace Solver {
 
         status solutionStatus = status::WORK;
         iterations = 0;
-        while (solutionStatus == WORK) {
+        while (solutionStatus != DONE) {
+            std::cout << "calculateCjZj" << std::endl;
             tableInstance->calculateCjZj();
+            std::cout << "evaluateCjZj" << std::endl;
             solutionStatus = tableInstance->evaluateCjZj();
-            // if (solutionStatus != WORK) {
-            //     continue;
-            // }
+            if (solutionStatus == ALTERNATED_OPTIMAL) {
+                break;
+            } 
+            std::cout << "calculateTheta" << std::endl;
+            std::cout << tableInstance->to_string() << std::endl;
             solutionStatus = tableInstance->calculateTheta();
-            solutionStatus = DONE;
+            if (solutionStatus == ALTERNATED_OPTIMAL) {
+                break;
+            } 
             // Save current table before next iteration
             Table toSave = *tableInstance;
             resolutionOrder[iterations] = toSave;
             ++iterations;
             std::cout << tableInstance->to_string() << std::endl;
+            std::cout << "updateBaseVariables" << std::endl;
             tableInstance->updateBaseVariables();
             std::cout << tableInstance->to_string() << std::endl;
+            std::cout << "executeIterationChange" << std::endl;
+            tableInstance->executeIterationChange();
+            std::cout << tableInstance->to_string() << std::endl;
+            std::cout << "Status = " << solutionStatus << std::endl;
         }
+        std::cout << "Status = " << solutionStatus << std::endl;
+        std::cout << tableInstance->to_string() << std::endl;
     }
 
 };

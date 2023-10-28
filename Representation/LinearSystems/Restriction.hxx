@@ -107,10 +107,9 @@ namespace LinearSystems {
 
             Value::Number getRestrictionSymbol();
 
-            void addArtificialVariable(std::vector<restrictionItem> &symbolVec, bool isFirst);
+            void addSlackVariable(std::vector<restrictionItem> &symbolVec, bool isFirst);
 
             void addArtificialVariableToObjective(std::vector<restrictionItem> &symbolVec);
-
     };
 
 };

@@ -90,6 +90,12 @@ namespace Solver {
 
             static std::string printSizing(std::string toSizeInput);
 
+            bool isBaseVariable(int index);
+
+            Value::Number getFirstNonBase();
+
+            int getFirstNonColumn();
+
             LinearSystems::System * systemToSolve;
 
             int addedX;

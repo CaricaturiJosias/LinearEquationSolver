@@ -41,8 +41,8 @@ namespace LinearSystems {
         restrictionNumber = i;
         restrictionInstance = static_cast<restrictionItem *>(malloc(sizeof(restrictionItem) * (variableNumber+2)));
         std::vector<restrictionItem> objective = {
-            std::make_pair(variableType::VALUE, Value::Number(3)),
-            std::make_pair(variableType::VALUE, Value::Number(4)),
+            std::make_pair(variableType::VALUE, Value::Number(-3)),
+            std::make_pair(variableType::VALUE, Value::Number(-4)),
             std::make_pair(variableType::SYMBOL, Value::Number((double)symbolEnum::EQUAL)),
             std::make_pair(variableType::VALUE, Value::Number(0))
         };
@@ -79,6 +79,7 @@ namespace LinearSystems {
                     static_cast<variableType>(chosen[j].first==variableType::SYMBOL),
                     Value::Number(chosen[j].second)};
         };
+
         displayRestriction();
     }
 
@@ -130,6 +131,9 @@ namespace LinearSystems {
 
                 // Value itself
                 valueToStore = input;
+            }
+            if (objectiveType == MIN) {
+                valueToStore = valueToStore*-1;
             }
 
             restrictionInstance[i] = 
@@ -265,7 +269,7 @@ namespace LinearSystems {
         return restrictionInstance[variableNumber].second;
     }
 
-    void Restriction::addArtificialVariable(std::vector<restrictionItem> &symbolVec, bool isFirst) {
+    void Restriction::addSlackVariable(std::vector<restrictionItem> &symbolVec, bool isFirst) {
         /**
          * I have a given restriction
          * Rn = 1*x1 -4*x2 + 7*x3 <= 10
@@ -286,18 +290,18 @@ namespace LinearSystems {
         /**
          * If the variable is below the oldVariable number, just copy
          * 
-         * If it is aboce the oldVariable number and is not == to the new variableNumber (symbol index)
+         * If it is above the oldVariable number and is not == to the new variableNumber (symbol index)
          * 
          * then insert symbolVec[i-oldVariableNumber] which is the 
-         * artificial variable until the new symbol inedx
+         * artificial variable until the new symbol index
          */
         
         // Each restrictions can have in maximum 2 artificial
         bool changeDone = false;
 
         for (int i = 0; i < (variableNumber+2); ++i) {
-            
-            bool isLastArtificial = i == (variableNumber-1);
+
+            bool isLastSlack = i == (variableNumber-1);
             bool isNextM = symbolVec[i-oldVariableNumber + 1].second.getMvalue();
 
             if (i < oldVariableNumber) {
@@ -318,17 +322,19 @@ namespace LinearSystems {
                 if (currentItem == 1 && !changeDone) {
                     changeDone = true;
 
-                    // values with M are isolated, so (1,1)
+                    // values with M are isolated, so (0,1) became (1,1)
                     if (isMItem) {
-                        // We want to save (0,1) so it doesnt comes out as (1 -1M)*xn but -1M*xn
+                        // We want to save as (0,1) so it doesnt comes out as (1 -1M)*xn but -1M*xn
                         symbolVec[i-oldVariableNumber].second.setValue(0);
+                        symbolVec[i-oldVariableNumber].second.setMValue(1);
+
                     } else if (isNextM) {
                         // A value right before the M is always negative, as the M value
-                        // exists to allow it to be >= 0
+                        // exists to allow it to be < 0
                         symbolVec[i-oldVariableNumber].second.setValue(-1);
                     }
 
-                    // If it contains an = already, we don't save any with 1
+                    // If it contains an = already, we don't save any with the value 1
                     if (!isNotEqualSign) {
                         symbolVec[i-oldVariableNumber].second.setValue(0);
                         symbolVec[i-oldVariableNumber].second.setMValue(0);
@@ -340,7 +346,7 @@ namespace LinearSystems {
                     symbolVec[i-oldVariableNumber].second.setValue(0);
 
                     // If its the last item skips this, avoid core dump and resets all items
-                    if (!isLastArtificial) {
+                    if (!isLastSlack) {
                         symbolVec[i-oldVariableNumber + 1].second.setValue(1);
                         // Some restrictions might have more than one artificial variable allowed
                         // And the second is always an M item, there is NEVER an restriction with
@@ -395,14 +401,18 @@ namespace LinearSystems {
          * then insert symbolVec[i-oldVariableNumber] which is the 
          * artificial variable until the new symbol inedx
          */
-        
+
         // Each restrictions can have in maximum 2 artificial
         for (int i = 0; i < (variableNumber+2); ++i) {
             if (i < oldVariableNumber) {
                 newObjetiveInstance[i] = restrictionInstance[i];
 
             } else if (i < variableNumber) {
-
+                
+                if (symbolVec[i-oldVariableNumber].second.getMvalue()) {
+                    symbolVec[i-oldVariableNumber].second.setMValue(-1);
+                    newObjetiveInstance[i] = symbolVec[i-oldVariableNumber];
+                }
                 newObjetiveInstance[i] = symbolVec[i-oldVariableNumber];
 
             } else {

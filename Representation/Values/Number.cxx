@@ -63,9 +63,10 @@ namespace Value {
     }
 
     Number& Number::operator+(Number input) {
-        value += input.getValue();
-        Mvalue += input.getMvalue();
-        return *this;
+        Number * result = new Number(0);
+        result->setValue(value + input.getValue());
+        result->setMValue(Mvalue + input.getMvalue());
+        return *result;
     }
 
     Number& Number::operator+(double input) {
@@ -75,9 +76,10 @@ namespace Value {
     }
 
     Number& Number::operator-(Number input) {
-        value -= input.getValue();
-        Mvalue -= input.getMvalue();
-        return *this;
+        Number * result = new Number(0);
+        result->setValue(value - input.getValue());
+        result->setMValue(Mvalue - input.getMvalue());
+        return *result;
     }
 
     Number& Number::operator-(double input) {
@@ -87,7 +89,7 @@ namespace Value {
     }
 
     Number& Number::operator*(Number input) {
-        Number * result = new Number();
+        Number * result = new Number(0);
          // No scenarios where it multiplies with M and M
         result->setMValue(Mvalue*input.getValue() + input.getMvalue()*value); 
         result->setValue(value*input.getValue());
@@ -95,9 +97,10 @@ namespace Value {
     }
 
     Number& Number::operator*(double input) {
-        value *= input;
-        Mvalue *= input;
-        return *this;
+        Number * result = new Number(0);
+        result->setValue(value * input);
+        result->setMValue(Mvalue * input);
+        return *result;
     }
 
     Number& Number::operator/(Number input) {
@@ -106,10 +109,8 @@ namespace Value {
         // But some Number instances might just be normal ints
         if (input.getValue() != 0) {
             result->setValue(value / input.getValue());
-            result->setMValue(Mvalue / input.getValue());
         } else {
-            result->setValue(value = INT_MAX);
-            result->setMValue(Mvalue = INT_MAX);
+            result->setValue(value = 0);
         }
         return *result;
     }
@@ -150,26 +151,33 @@ namespace Value {
          * 0 + 0M
          * 
         */
-        
-        if (value > 0) {
-            return value > input.getValue();
-        } else if (input.getValue() > 0) {
-            return false;
-        } else if (Mvalue > 0) { // Both value and input's value are 0 or negative from here
-            return Mvalue > input.getMvalue();
-        } else if (!(value == 0 && input.getValue() == 0)) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
-            return value > input.getValue();
-        }
+        // std::cout   << "Value: " << value << std::endl
+        //             << "MValue: " << Mvalue << std::endl
+        //             << "input.Value: " << input.getValue() << std::endl
+        //             << "input.Mvalue: " << input.getMvalue() << std::endl;
         // normal value is hopeless (0 and 0)
         if (Mvalue > 0) {
+            // std::cout << "Return: " << (Mvalue > input.getMvalue()) << std::endl;
             return Mvalue > input.getMvalue();
         } else if (input.getMvalue() > 0) {
+            // std::cout << "Return: " << (false) << std::endl;
             return false;
-        } else if (Mvalue > 0) { // Both Mvalue and input's Mvalue are 0 or negative from here
-            return Mvalue > input.getMvalue();
-        } else if (!(Mvalue == 0 && input.getMvalue() == 0)) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
+        } else if (Mvalue != 0 || input.getMvalue() != 0) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
+            // std::cout << "Return: " << (Mvalue > input.getMvalue()) << std::endl;
             return Mvalue > input.getMvalue();
         }
+
+        if (value > 0) {
+            // std::cout << "Return: " << (value > input.getValue()) << std::endl;
+            return value > input.getValue();
+        } else if (input.getValue() > 0) {
+            // std::cout << "Return: " << false << std::endl;
+            return false;
+        } else if (value != 0 || input.getValue() != 0) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
+            // std::cout << "Return: " << (value > input.getValue()) << std::endl;
+            return value > input.getValue();
+        }
+
         return false;
     }
 
@@ -178,25 +186,26 @@ namespace Value {
     }
 
     bool Number::operator<(Number input) {
-         if (value > 0) {
-            return value < input.getValue();
-        } else if (input.getValue() > 0) {
-            return false;
-        } else if (Mvalue > 0) { // Both value and input's value are 0 or negative from here
-            return Mvalue < input.getMvalue();
-        } else if (!(value == 0 && input.getValue() == 0)) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
-            return value < input.getValue();
-        }
-        // normal value is hopeless (0 and 0)
+        // std::cout   << "Value: " << value << std::endl
+        //             << "MValue: " << Mvalue << std::endl
+        //             << "input.Value: " << input.getValue() << std::endl
+        //             << "input.Mvalue: " << input.getMvalue() << std::endl;
         if (Mvalue > 0) {
             return Mvalue < input.getMvalue();
         } else if (input.getMvalue() > 0) {
             return false;
-        } else if (Mvalue > 0) { // Both Mvalue and input's Mvalue are 0 or negative from here
-            return Mvalue < input.getMvalue();
-        } else if (!(Mvalue == 0 && input.getMvalue() == 0)) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
+        } else if (Mvalue != 0 || input.getMvalue() != 0) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
             return Mvalue < input.getMvalue();
         }
+
+        if (value > 0) {
+            return value < input.getValue();
+        } else if (input.getValue() > 0) {
+            return false;
+        } else if (value != 0 || input.getValue() != 0) { // Both not 0, so 0 > -1 or -1 > -1 or -1 > -4
+            return value < input.getValue();
+        }
+        
         return (value < input.getValue());
     }
 

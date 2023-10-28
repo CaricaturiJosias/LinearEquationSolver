@@ -9,9 +9,10 @@
  * 
  */
 
-#include "Table.hxx"
-#include "../Representation/Values/Number.hxx"
 #include "../Representation/LinearSystems/Restriction.hxx"
+#include "../Representation/Values/Number.hxx"
+#include "Table.hxx"
+#include <limits.h>
 #include <iostream>
 #include <string>
 #include <set>
@@ -74,7 +75,7 @@ namespace Solver {
 
         for (int i = 0; i < restrictionNbr && restrictions != nullptr; i++, restrictions++) {
             isFirst = i == 0;
-            restrictions->addArtificialVariable(artificialVariables, isFirst);
+            restrictions->addSlackVariable(artificialVariables, isFirst);
         }
 
     }
@@ -123,6 +124,7 @@ namespace Solver {
 
         int numVariables = systemToSolve->getNumberOfVariables();
         int numRestrictions = systemToSolve->getNumberOfRestrictions();
+        int repetition = 0;
 
         bool lookForM = true;
 
@@ -132,13 +134,13 @@ namespace Solver {
          * 1 - M values
          * 2 - values without M
          */
-        bool alreadyIn, hasMvalue;
+        bool alreadyIn, hasMvalue, isNaturalVariable, lookForSlack, lookForNonSlack;
 
         for (int i = 0; i < numRestrictions; ++i) {
             /**
              * Look for each M value or values without M on the next
              */
-            for (int j = numVariables-1; j >= 0; --j) {
+            for (int j = 0; j < numVariables; ++j) {
                 // If we are looking for M values (first loop)
                 alreadyIn  = insertedBase.find(j) != insertedBase.end();
                 hasMvalue = objectiveItem[j].second.getMvalue();
@@ -153,7 +155,17 @@ namespace Solver {
                     break;
                 } // if (lookForM && hasMvalue)
 
-                if (!lookForM) {
+                isNaturalVariable = objectiveItem[j].first == LinearSystems::VALUE;
+                lookForSlack = (!lookForM) && !isNaturalVariable;
+                lookForNonSlack = ((!lookForM) && isNaturalVariable) && isNaturalVariable;
+
+                // If we already looked for M (M) AND its (not) a non-slack (N)
+                // OR
+                // we already looked for M (M) AND its a non-slack AND (N) we look for a non-slack (A)
+                // (M && !N) || ((M && N) && S)
+                // 
+                if (lookForSlack || lookForNonSlack) {
+
                     // Last item? we cannot reach this if its a M value in the end
                     if (j == (numVariables-1)) {
                         insertedBase.insert(j);
@@ -179,7 +191,10 @@ namespace Solver {
             if (insertedBase.size() != (i+1)) {
                 --i;
                 lookForM = false;
+                ++repetition;
+                continue;
             }
+            repetition = 0;
         }
     }
 
@@ -237,16 +252,14 @@ namespace Solver {
         std::string output;
 
         LinearSystems::restrictionItem * objective = systemToSolve->getObjective()->getRestriction();
-        std::cout << "NumVar: " << numVar << std::endl 
-                  << "NumRes: " << numRes << std::endl;
-        output = printSizing("| Base ");
+        output = printSizing("| Base");
 
         for (int i = 0;  i < numVar; ++i) {
-            output += printSizing( " | " + objective[i].second.to_string() + "*x"+std::to_string(i+1));
+            output += printSizing( "|" + objective[i].second.to_string() + "*x"+std::to_string(i+1));
         } // for (int i = 0
 
-        output += printSizing(" | b ");
-        output += printSizing(" | Theta");
+        output += printSizing("|b");
+        output += printSizing("|Theta");
         output += "\n";
 
         for (int i = 0; i < numVar+3; ++i) {
@@ -261,26 +274,27 @@ namespace Solver {
                     // Base variable: value itself (ie. 2 - 3*M) and them
                     // index of the variable (ie. x8)
                     // We would have for example: (2-3*M)*x8
-                    output += printSizing("| " + baseVariables[i].value.second.to_string() +
+                    output += printSizing("|" + baseVariables[i].value.second.to_string() +
                             "*x"  + std::to_string(baseVariables[i].index));
                 } // if (j == 0)
                 // Include a Number into the output, we don't want M as it isn't supposed to appear here
-                output += printSizing(" | "+tableArray[i][j].to_string());
+                output += printSizing("|"+tableArray[i][j].to_string());
             } // for (int j = 0;  j <= numVar+1; ++j)
             output += "\n";
         } // for (int i = 0;  i <= numRes; ++i)
         
         // Print (Cj - Zj)
-        output += printSizing("| Cj - Zj");
+        output += printSizing("|Cj - Zj");
         for (int j = 0;  j <= numVar; ++j) {
-            output += printSizing(" | "+ tableArray[numRes][j].to_string());
+            output += printSizing("|"+ tableArray[numRes][j].to_string());
         }
-        output += printSizing(" | ");
+        output += printSizing("|");
+        output += "\n";
         return output;
     }
 
     std::string Table::printSizing(std::string toSizeInput) {
-        std::string base = "             ";
+        std::string base = "              ";
         std::string output;
         // Fits the bill
         if (base.size() == toSizeInput.size()) {
@@ -298,13 +312,37 @@ namespace Solver {
         return output;
     }
 
+    bool Table::isBaseVariable(int index) {
+        for (int i = 0; i < numRes; ++i) {
+            if (baseVariables[i].index == (index+1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Value::Number Table::getFirstNonBase() {
+        for (int i = 0; i < numVar; ++i) {
+            if (!isBaseVariable(i)) {
+                return tableArray[numRes][i];
+            }  
+        }
+        return Value::Number(0);
+    }
+
+    int Table::getFirstNonColumn() {
+        for (int i = 0; i < numVar; ++i) {
+            if (!isBaseVariable(i)) {
+                return i;
+            }  
+        }
+        return 0;
+    }
+
     void Table::calculateCjZj() {
         /**
          * Get each column, 
          * multiply the values with the base on each line
-         * 
-         * 
-         * 
          */
 
         LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
@@ -314,40 +352,57 @@ namespace Solver {
             // Each value
             Value::Number current;
             for (int i = 0; i < numRes; ++i) {
-                current = current + tableArray[i][j] * baseVariables[i].value.second;
+                current += tableArray[i][j] * baseVariables[i].value.second;
             }
-            tableArray[numRes][j] = current - objectives[j].second;
+            tableArray[numRes][j] = objectives[j].second - current;
         }        
 
     }
 
     status Table::evaluateCjZj() {
         pivotColumn = 0;
-        Value::Number current = tableArray[numRes][0];
-        Value::Number total = Value::Number(0,0);
+        Value::Number current = getFirstNonBase();
+        pivotColumn = getFirstNonColumn();
+        Value::Number total = Value::Number(0);
+
         // Each column
         for (int j = 0; j < numVar; ++j) {
             // Keep track of highest column
+            // We don't need to check the zeroes that the base variables generate
+            if (isBaseVariable(j)) {
+                // std::cout   << "Skiping j: " << j << std::endl 
+                //             << "With value: " << tableArray[numRes][j].to_string() << std::endl;
+                continue;
+            }
+            // std::cout   << "Did not skip j: " << j << std::endl 
+            //             << "With value: " << tableArray[numRes][j].to_string() << std::endl;
             total += tableArray[numRes][j];
-            if (current < tableArray[numRes][j]) {
+            if (tableArray[numRes][j] > current) {
                 
                 current = tableArray[numRes][j];
                 // Saves the pivot column for further calculations
+                // std::cout << "Changing pivot" << std::endl;
                 pivotColumn = j;
             }   
+            // std::cout << "Printing current " << current.to_string() << std::endl;
         }
+        // std::cout << "Pivot column: " << pivotColumn+1 << std::endl;
         tableArray[numRes][numVar] = total;
         Value::Number zero = Value::Number(0,0);
+        // std::cout << "Current: " << current.to_string() << std::endl;
+        // std::cout << "zero: " << zero.to_string() << std::endl;
         if (current < zero) {
-            return NON_VIABLE;
-        } else if (current == zero) {
+            // std::cout << "done" << std::endl;
             return DONE;
+        } else if (current == zero) {
+            // std::cout << "alternado" << std::endl;
+            return ALTERNATED_OPTIMAL;
         }
         return WORK;
     }
 
     status Table::calculateTheta() {
-        std::cout << "pivot column is " << pivotColumn+1 << std::endl;
+        // std::cout << "pivot column is " << pivotColumn+1 << std::endl;
         // For each line calculate theta
         for (int i = 0; i < numRes; ++i) {
             tableArray[i][numVar+1] = tableArray[i][numVar] / tableArray[i][pivotColumn];
@@ -356,7 +411,6 @@ namespace Solver {
         pivotLine = 0;
         Value::Number current = tableArray[0][numVar+1];
         // Each column
-        bool degenerated = false;
 
         // Checks which is lower
         for (int i = 0; i < numRes; ++i) {
@@ -371,20 +425,17 @@ namespace Solver {
         int same = 0;
         for (int i = 0; i < numRes; ++i) {
             if (current == tableArray[i][numVar+1] && i != 0) {
-                degenerated = true;
                 ++same;
-            } else {
-                degenerated = false;
             }
         }
 
-        std::cout << "Pivot Line: " << pivotLine+1 << std::endl;
+        // std::cout << "Pivot Line: " << pivotLine+1 << std::endl;
+        // std::cout << "Pivot Element: " << current.to_string() << std::endl;
+        // std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
         if (same>1) {
             return DEGENERATED;
         } else if (current < Value::Number(0,0)) {
             return NON_VIABLE;
-        } else if (current == Value::Number(0,0)) {
-            return ALTERNATED_OPTIMAL;
         }
 
         return WORK;
@@ -398,12 +449,11 @@ namespace Solver {
          * 
          * Now we do the exchange
         */
-        std::cout << "Updating?" << std::endl;
         LinearSystems::restrictionItem * objectives = systemToSolve->getObjective()->getRestriction();
-        std::cout << "Old base variable that will be gone: " << baseVariables[pivotLine].value.second.to_string() << std::endl;
+        // std::cout << "Old base variable that will be gone: " << baseVariables[pivotLine].value.second.to_string() << std::endl;
     
         baseVariables[pivotLine] = baseVariableItem{objectives[pivotColumn], pivotColumn+1};
-        std::cout << "New base variable that is here now: " << baseVariables[pivotLine].value.second.to_string() << std::endl;
+        // std::cout << "New base variable that is here now: " << baseVariables[pivotLine].value.second.to_string() << std::endl;
         // Zero out the Theta column
         for (int i = 0; i < numRes; ++i) {
             tableArray[i][numVar+1] = Value::Number(0);
@@ -418,8 +468,35 @@ namespace Solver {
         /**
          * WE DON'T THE ENTIRE GAUSS JORDAN, YAY
          * 
-         * We need however, to 0 out the column of the new base variable
+         * We need however, to 0 out the column of the new base variable on all the other ones
         */
+
+        Value::Number pivotElement = tableArray[pivotLine][pivotColumn];
+
+        // Pivot line is easy, yay
+        for (int i = 0; i <= numVar; ++i) {
+            tableArray[pivotLine][i] = tableArray[pivotLine][i]/pivotElement;
+        }
+
+        // We will use the created line as reference for the next lines
+        // We will find the value 'A' that makes 
+        // tableArray[nonPivotLine][pivotColumn] -A*tableArray[pivotLine][pivotColumn]
+        // Become zero
+
+        // Non pivot lines is a bit harder
+        // Pivot line is easy, yay
+        for (int i = 0; i < numRes; ++i) {
+            if (i == pivotLine) continue;
+            // Value of the non pivot line on the pivot column, so we can always remember it ahead
+            Value::Number pivotColumnEqualizer = tableArray[i][pivotColumn];
+            for (int j = 0; j <= numVar; ++j) {
+                tableArray[i][j] = tableArray[i][j] - tableArray[pivotLine][j]*pivotColumnEqualizer;
+            }
+        }
+
+        // Discover which is the value to divide all by
+
+
     }
 
 };
