@@ -37,7 +37,7 @@ namespace LinearSystems {
     enum variableType {
         VALUE,
         SYMBOL,
-        ARTIFICIAL_VARIABLE
+        SLACK_VARIABLE
     };
 
     typedef variableType isSymbol;

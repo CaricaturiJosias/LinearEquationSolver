@@ -77,6 +77,7 @@ namespace Solver {
         iterations = 0;
         std::string a;
         std::string outputString;
+        std::cout << tableInstance->getSystemToSolve()->to_string() << std::endl;
         while (solutionStatus != DONE) {
 
             if (selectedOption == 3) {
@@ -98,6 +99,7 @@ namespace Solver {
                 std::cout << tableInstance->getSystemToSolve()->to_string() << std::endl;
                 std::cout << tableInstance->to_string() << std::endl;
             }
+
             if (solutionStatus != DONE) {
                 solutionStatus = tableInstance->calculateTheta();
             } else {
@@ -105,7 +107,11 @@ namespace Solver {
             }
             if (solutionStatus == DONE) {
                 continue;
-            } 
+            }  else if (solutionStatus == NO_FRONTIER) {
+                std::cout << "No frontier system detected, no solution available here" << std::endl;
+                std::cout << tableInstance->to_string() << std::endl;
+                break; // Avoid last print
+            }
             // Save current table before next iteration
             Table toSave = *tableInstance;
             resolutionOrder[iterations] = toSave;
@@ -121,12 +127,14 @@ namespace Solver {
             // std::cout << "executeIterationChange" << std::endl;
             tableInstance->executeIterationChange();
         }
-        // std::cout << "Status = " << solutionStatus << std::endl;
-        std::cout << std::endl  << "Finished! The final status is " 
-                                << statusToString[solutionStatus] << std::endl << std::endl;
-        std::cout << tableInstance->to_string() << std::endl;
+        if (solutionStatus == DONE || solutionStatus == ALTERNATED_OPTIMAL) {
+            // std::cout << "Status = " << solutionStatus << std::endl;
+            std::cout << std::endl  << "Finished! The final status is " 
+                                    << statusToString[solutionStatus] << std::endl << std::endl;
+            std::cout << tableInstance->to_string() << std::endl;
 
-        std::cout << tableInstance->getResults() << std::endl;
+            std::cout << tableInstance->getResults() << std::endl;
+        }
 
         delete tableInstance;
     }

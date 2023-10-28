@@ -75,7 +75,7 @@ namespace LinearSystems {
         bool inputNotValid = true;
         std::string input;
         while (inputNotValid) {
-            std::cout << "Is the objective to minimize or maximize? [M,m]: ";
+            std::cout << "Is the objective to maximize(M) or to minimize(m)? [M,m]: ";
             std::cin >> input;
             if (input == std::string("M")) {
                 objectiveAction = objType::MAX;

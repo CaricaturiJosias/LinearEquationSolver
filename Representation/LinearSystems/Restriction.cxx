@@ -360,10 +360,11 @@ namespace LinearSystems {
                 newObjetiveInstance[i] = restrictionInstance[i];
 
             } else if (i < variableNumber) {
-                
+
                 if (symbolVec[i-oldVariableNumber].second.getMvalue()) {
                     symbolVec[i-oldVariableNumber].second.setMValue(-1);
                     newObjetiveInstance[i] = symbolVec[i-oldVariableNumber];
+                    newObjetiveInstance[i].first = LinearSystems::SLACK_VARIABLE;
                 }
                 newObjetiveInstance[i] = symbolVec[i-oldVariableNumber];
 
@@ -375,6 +376,7 @@ namespace LinearSystems {
                 // Replace the symbol <= or >= with =
                 if (i == variableNumber && isNotEqualSign) {
                     newObjetiveInstance[i].second.setValue(symbolEnum::EQUAL);
+                    newObjetiveInstance[i].first = LinearSystems::SYMBOL;
                 }
             }
         }

@@ -105,13 +105,13 @@ namespace Solver {
         // We want to have only
         Value::Number valueX(0, 0);
         result.push_back(LinearSystems::restrictionItem(
-                LinearSystems::variableType::ARTIFICIAL_VARIABLE, valueX));
+                LinearSystems::variableType::SLACK_VARIABLE, valueX));
 
         bool addM = restrictionSymbol == LinearSystems::symbolMap[LinearSystems::symbolEnum::HIGHER_EQUAL];
         if (addM) {
             Value::Number valueM(0, 1);
             result.push_back(LinearSystems::restrictionItem(
-                    LinearSystems::variableType::ARTIFICIAL_VARIABLE, valueM));
+                    LinearSystems::variableType::SLACK_VARIABLE, valueM));
         }
 
         return result;
@@ -218,8 +218,7 @@ namespace Solver {
                 }
             }
             tempBaseVariables[i].index = candidate; 
-            tempBaseVariables[i].value = 
-                std::make_pair(LinearSystems::VALUE, objectiveItem[candidate-1].second);
+            tempBaseVariables[i].value = objectiveItem[candidate-1];
         }
 
         free(baseVariables);
@@ -261,7 +260,7 @@ namespace Solver {
                     toInsert.push_back(Value::Number(restrictionIt[j].second.getMvalue()));
                     continue;
                 } else {
-                    toInsert.push_back(restrictionIt[j].second);    
+                    toInsert.push_back(restrictionIt[j].second);   
                 }
 
             } // for (int j = 0
@@ -377,6 +376,16 @@ namespace Solver {
         return false;
     }
 
+    bool Table::hasSlackVariable() {
+        for (int i = 0; i < numRes; ++i) {
+            std::cout << baseVariables[i].value.first << std::endl;
+            if (baseVariables[i].value.first == LinearSystems::SLACK_VARIABLE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void Table::calculateCjZj() {
         /**
          * Get each column, 
@@ -418,8 +427,7 @@ namespace Solver {
             }
             // std::cout   << "Did not skip j: " << j << std::endl 
             //             << "With value: " << tableArray[numRes][j].to_string() << std::endl;
-            if (tableArray[numRes][j] > current) {
-                
+            if (tableArray[numRes][j] > current) { 
                 current = tableArray[numRes][j];
                 // Saves the pivot column for further calculations
                 // std::cout << "Changing pivot" << std::endl;
@@ -427,15 +435,23 @@ namespace Solver {
             }   
             // std::cout << "Printing current " << current.to_string() << std::endl;
         }
+
         // std::cout << "Pivot column: " << pivotColumn+1 << std::endl;
         Value::Number zero = Value::Number(0,0);
         // std::cout << "Current: " << current.to_string() << std::endl;
         // std::cout << "zero: " << zero.to_string() << std::endl;
-        if (current < zero) {
+        bool hasSlack = hasSlackVariable();
+        if (hasSlack) {
+            std::cout << "HAS SLACK" << std::endl;
+        }
+        bool isDone = (current < zero) || (current == zero);
+        if (isDone && hasSlack) {
+            return NON_VIABLE;
+        }else if (current < zero) {
             // std::cout << "done" << std::endl;
             return DONE;
         } else if (current == zero) {
-            std::cout << "alternado" << std::endl;
+            // std::cout << "alternado" << std::endl;
             return ALTERNATED_OPTIMAL;
         }
         return WORK;
@@ -474,8 +490,8 @@ namespace Solver {
         // std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
         if (same>1) {
             return DEGENERATED;
-        } else if (current < Value::Number(0,0)) {
-            return NON_VIABLE;
+        } else if (current <= Value::Number(0,0) || current == Value::Number(0,0)) {
+            return NO_FRONTIER;
         }
 
         return WORK;
@@ -553,7 +569,10 @@ namespace Solver {
         }
         if (systemToSolve->getAction() == LinearSystems::MIN) {
             output += "C: " + (tableArray[numRes][numVar]*-1).to_string();
+        } else {
+            output += "Z: " + (tableArray[numRes][numVar]).to_string();
         }
+
         output += "\n";
 
         for (int i = 0; i < numRes; ++i) {

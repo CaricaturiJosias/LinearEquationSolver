@@ -102,6 +102,8 @@ namespace Solver {
 
             bool isAlreadyInList(int index, baseVariableItem * givenList);
 
+            bool hasSlackVariable();
+
             LinearSystems::System * systemToSolve;
 
             int numVar;
