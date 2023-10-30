@@ -493,7 +493,7 @@ namespace Solver {
         // std::cout << "Pivot (Cj - Zj): " << tableArray[numRes][pivotColumn].to_string() << std::endl;
         if (same>1) {
             return DEGENERATED;
-        } else if (higher < Value::Number(0,0) || higher == Value::Number(0,0) || higher != INT_MAX) {
+        } else if (higher < Value::Number(0,0) || higher == Value::Number(0,0) || higher == INT_MAX) {
             return NO_FRONTIER;
         }
 
